@@ -1,72 +1,80 @@
+"use client";
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Mail, Phone, MapPin, Facebook, Linkedin, Twitter } from 'lucide-react';
 
 const Footer = () => {
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
+
   return (
-    <footer className="bg-primary text-white pt-20 pb-10">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-        
-     
-        <div className="space-y-6">
-          <h3 className="text-2xl font-bold italic">OBRUS APEX</h3>
-          <p className="text-gray-400 leading-relaxed">
-            Leading provider of integrated facility management, manpower outsourcing, 
-            and environmental solutions for corporate and industrial clients.
-          </p>
-          <div className="flex gap-4">
-            <Link href="#" className="p-2 bg-primary-light hover:bg-accent rounded-full transition-colors"><Facebook size={18} /></Link>
-            <Link href="#" className="p-2 bg-primary-light hover:bg-accent rounded-full transition-colors"><Linkedin size={18} /></Link>
-            <Link href="#" className="p-2 bg-primary-light hover:bg-accent rounded-full transition-colors"><Twitter size={18} /></Link>
+    <footer className="bg-navy-deep text-white">
+      {isHomePage && (
+        <div className="max-w-7xl mx-auto px-[5%] pt-20 pb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gold rounded flex items-center justify-center font-bold text-navy text-xl">O</div>
+              <div className="flex flex-col">
+                <span className="font-serif font-bold text-white text-xl leading-none">OBRUS</span>
+                <span className="text-gold-lt text-[10px] uppercase tracking-widest">Apex Services</span>
+              </div>
+            </div>
+            <p className="text-slate text-sm leading-relaxed">
+              Nigeria's leading provider of integrated facility management, manpower outsourcing, 
+              and environmental solutions for corporate and industrial clients.
+            </p>
+            <div className="flex gap-4">
+              <Link href="#" className="w-10 h-10 flex items-center justify-center border border-white/10 hover:border-gold hover:text-gold rounded-lg transition-all"><Facebook size={18} /></Link>
+              <Link href="#" className="w-10 h-10 flex items-center justify-center border border-white/10 hover:border-gold hover:text-gold rounded-lg transition-all"><Linkedin size={18} /></Link>
+              <Link href="#" className="w-10 h-10 flex items-center justify-center border border-white/10 hover:border-gold hover:text-gold rounded-lg transition-all"><Twitter size={18} /></Link>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-bold mb-6 text-gold uppercase tracking-[0.2em]">Quick Links</h4>
+            <ul className="space-y-4 text-slate text-sm">
+              <li><Link href="/about" className="hover:text-gold-lt transition-colors">About Company</Link></li>
+              <li><Link href="/services" className="hover:text-gold-lt transition-colors">Our Solutions</Link></li>
+              <li><Link href="/recruitment" className="hover:text-gold-lt transition-colors">Career Opportunities</Link></li>
+              <li><Link href="/contact" className="hover:text-gold-lt transition-colors">Contact Support</Link></li>
+              <li><Link href="/login" className="hover:text-gold-lt transition-colors opacity-50 text-xs">Admin Portal</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-bold mb-6 text-gold uppercase tracking-[0.2em]">Core Divisions</h4>
+            <ul className="space-y-4 text-slate text-sm font-medium">
+              <li className="hover:text-white transition-colors cursor-pointer">Manpower Outsourcing</li>
+              <li className="hover:text-white transition-colors cursor-pointer">Waste Management</li>
+              <li className="hover:text-white transition-colors cursor-pointer">HSE Consultancy</li>
+              <li className="hover:text-white transition-colors cursor-pointer">Equipment Supply</li>
+              <li className="hover:text-white transition-colors cursor-pointer">Industrial Cleaning</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-bold mb-6 text-gold uppercase tracking-[0.2em]">Office</h4>
+            <ul className="space-y-4 text-sm">
+              <li className="flex items-start gap-3 text-slate">
+                <MapPin className="text-gold shrink-0" size={18} />
+                <span>Port Harcourt, Rivers State, Nigeria</span>
+              </li>
+              <li className="flex items-center gap-3 text-slate">
+                <Phone className="text-gold shrink-0" size={18} />
+                <span>+234 800 OBRUS APEX</span>
+              </li>
+              <li className="flex items-center gap-3 text-slate">
+                <Mail className="text-gold shrink-0" size={18} />
+                <span>info@obrusapex.com</span>
+              </li>
+            </ul>
           </div>
         </div>
+      )}
 
-       
-        <div>
-          <h4 className="text-lg font-bold mb-6 text-accent">Quick Links</h4>
-          <ul className="space-y-4 text-gray-400">
-            <li><Link href="/about" className="hover:text-white transition-colors">About Our Company</Link></li>
-            <li><Link href="/services" className="hover:text-white transition-colors">Our Solutions</Link></li>
-            <li><Link href="/jobs" className="hover:text-white transition-colors">Career Opportunities</Link></li>
-            <li><Link href="/contact" className="hover:text-white transition-colors">Contact Support</Link></li>
-            <li><Link href="/admin/login" className="hover:text-white transition-colors text-xs opacity-50">Admin Portal</Link></li>
-          </ul>
-        </div>
-
-        
-        <div>
-          <h4 className="text-lg font-bold mb-6 text-accent">Core Services</h4>
-          <ul className="space-y-4 text-gray-400">
-            <li className="hover:text-white transition-colors cursor-pointer">Manpower Outsourcing</li>
-            <li className="hover:text-white transition-colors cursor-pointer">Waste Management</li>
-            <li className="hover:text-white transition-colors cursor-pointer">HSE Training</li>
-            <li className="hover:text-white transition-colors cursor-pointer">Industrial Cleaning</li>
-            <li className="hover:text-white transition-colors cursor-pointer">Pest Control</li>
-          </ul>
-        </div>
-
-        
-        <div>
-          <h4 className="text-lg font-bold mb-6 text-accent">Get In Touch</h4>
-          <ul className="space-y-4">
-            <li className="flex items-start gap-3 text-gray-400">
-              <MapPin className="text-accent shrink-0" size={20} />
-              <span>Head Office Address, City, State, Country</span>
-            </li>
-            <li className="flex items-center gap-3 text-gray-400">
-              <Phone className="text-accent shrink-0" size={20} />
-              <span>+234 (0) 123 456 789</span>
-            </li>
-            <li className="flex items-center gap-3 text-gray-400">
-              <Mail className="text-accent shrink-0" size={20} />
-              <span>info@obrusapex.com</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 mt-20 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
-        <p>&copy; {new Date().getFullYear()} OBRUS Integrated Services. All Rights Reserved.</p>
+      <div className={`max-w-7xl mx-auto px-6 py-8 text-center text-slate text-xs ${isHomePage ? "border-t border-white/5" : ""}`}>
+        <p>&copy; 2026 OBRUS APEX SERVICES. All Rights Reserved.</p>
       </div>
     </footer>
   );
