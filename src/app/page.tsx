@@ -1,185 +1,160 @@
-import React from 'react';
-import { 
-  ShieldCheck, 
-  Users, 
-  Trash2, 
-  Briefcase, 
-  ChevronRight, 
-  CheckCircle2,
-  Clock,
-  Award,
-  BarChart3,
-  ArrowRight
-} from 'lucide-react';
+"use client";
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { 
+  Users, ShieldCheck, Trash2, Crosshair, 
+  Briefcase, Lightbulb, ArrowRight, Star 
+} from 'lucide-react';
 
 export default function LandingPage() {
+  const [showPopup, setShowPopup] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <section className="relative min-h-[95vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-transparent z-10" />
-          <img 
-            src="" 
-            alt="Corporate Office"
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        <div className="relative z-20 max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12">
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/20 border border-accent/30 text-accent text-sm font-medium">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
-              </span>
-              Trusted by Industry Leaders
+    <div className="min-h-screen bg-cream font-sans text-navy">
+      {showPopup && (
+        <div className="fixed inset-0 bg-navy-deep/95 z-[9999] flex items-center justify-center backdrop-blur-md p-4">
+          <div className="bg-white rounded-[24px] max-w-lg w-full p-12 text-center shadow-2xl animate-in zoom-in duration-500">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-navy rounded-lg flex items-center justify-center text-gold font-bold text-2xl">O</div>
+              <div className="text-left">
+                <span className="block font-serif text-2xl font-bold leading-none">OBRUS</span>
+                <span className="text-[10px] uppercase tracking-widest text-gold font-semibold">Apex Services</span>
+              </div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-extrabold text-white leading-[1.1]">
-              Integrated <br />
-              <span className="text-accent">Solutions</span> for Modern Enterprise.
-            </h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-xl leading-relaxed">
-              OBRUS APEX SERVICES delivers excellence in manpower outsourcing, environmental management, 
-              and technical consultancy. We ensure your operations remain seamless and compliant.
+            <h2 className="font-serif text-3xl font-bold mb-4">Welcome to OBRUS</h2>
+            <p className="text-slate text-sm leading-relaxed mb-8">
+              Your trusted partner for Recruitment, Environmental Services, Equipment Procurement, and HSE Consultancy across Nigeria.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/services" className="btn-primary flex items-center gap-2 group">
-                Explore Services
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <button 
+              onClick={() => setShowPopup(false)}
+              className="bg-navy text-white px-10 py-3 rounded-full font-semibold hover:bg-gold hover:text-navy transition-all duration-300"
+            >
+              Enter Website →
+            </button>
+          </div>
+        </div>
+      )}
+
+      <section className="relative min-h-screen flex items-center px-[5%] py-24 overflow-hidden bg-gradient-to-br from-navy-deep via-navy to-navy-mid">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#c8921e_1px,transparent_1px)] [background-size:40px_40px]" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 px-4 py-1.5 rounded-full text-gold-lt text-[11px] uppercase tracking-widest font-medium mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-gold-lt animate-pulse" />
+              Port Harcourt, Nigeria · Est. 2024
+            </div>
+            <h1 className="font-serif text-5xl md:text-7xl text-white font-bold leading-[1.1] mb-6">
+              Integrated Services. <br />
+              <span className="text-gold-lt italic">Exceptional Standards.</span>
+            </h1>
+            <p className="text-white/60 text-lg leading-relaxed mb-10 max-w-lg">
+              OBRUS Apex Services delivers recruitment, environmental management, and technical consultancy built on integrity and accountability.
+            </p>
+            <div className="flex flex-wrap gap-4 mb-12">
+              <Link href="/recruitment" className="bg-gradient-to-r from-gold to-gold-lt text-navy px-8 py-3.5 rounded-full font-bold text-sm shadow-lg shadow-gold/20 hover:-translate-y-1 transition-all">
+                🧑‍💼 Recruitment
               </Link>
-              <Link href="/contact" className="px-8 py-3 rounded-md font-semibold text-white border border-gray-500 hover:bg-white hover:text-primary transition-all">
-                Request a Consultation
+              <Link href="/environmental" className="border border-white/20 text-white px-8 py-3.5 rounded-full font-medium text-sm hover:border-gold-lt hover:text-gold-lt transition-all">
+                🌿 Environmental
               </Link>
+            </div>
+            <div className="flex gap-8">
+              <div>
+                <div className="font-serif text-3xl text-white font-bold">400+</div>
+                <div className="text-[10px] text-white/40 uppercase tracking-widest">Placements</div>
+              </div>
+              <div className="border-l border-gold/30 pl-8">
+                <div className="font-serif text-3xl text-white font-bold">150+</div>
+                <div className="text-[10px] text-white/40 uppercase tracking-widest">Clients</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex relative justify-center items-center h-[500px]">
+            <div className="absolute w-80 h-80 rounded-full border border-gold/10 animate-[spin_20s_linear_infinite]" />
+            <div className="absolute w-[450px] h-[450px] rounded-full border border-dashed border-gold/5 animate-[spin_35s_linear_infinite_reverse]" />
+            <div className="relative bg-navy rounded-3xl p-12 border border-gold/20 shadow-2xl">
+               <Crosshair className="w-32 h-32 text-gold-lt" />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-white py-12 border-b">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { label: "Services Offered", value: "10+" },
-              { label: "Client Satisfaction", value: "99%" },
-              { label: "Operational Safety", value: "100%" },
-              { label: "Response Time", value: "< 24h" },
-            ].map((stat, i) => (
-              <div key={i} className="text-center">
-                <div className="text-3xl font-bold text-primary">{stat.value}</div>
-                <div className="text-sm text-gray-500 uppercase tracking-widest font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </div>
+      <div className="bg-gradient-to-r from-gold to-gold-lt py-8 px-[5%]">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          {[
+            { n: "400+", l: "Staff Placed" },
+            { n: "250+", l: "Env. Services" },
+            { n: "150+", l: "Clients Served" },
+            { n: "6", l: "Divisions" },
+          ].map((item, i) => (
+            <div key={i}>
+              <div className="font-serif text-3xl font-bold text-navy">{item.n}</div>
+              <div className="text-[10px] font-bold text-navy/60 uppercase tracking-widest">{item.l}</div>
+            </div>
+          ))}
         </div>
-      </section>
-      <section className="section-padding grid lg:grid-cols-2 gap-16 items-center">
-        <div className="relative">
-          <img 
-            src="" 
-            alt="Professional Consultation"
-            className="rounded-2xl shadow-2xl"
-          />
-          <div className="absolute -bottom-6 -right-6 bg-accent p-8 rounded-2xl hidden md:block">
-            <Award className="w-12 h-12 text-primary" />
-          </div>
-        </div>
-        <div className="space-y-6">
-          <h4 className="text-accent font-bold tracking-[0.2em] uppercase text-sm">About OBRUS APEX</h4>
-          <h2 className="text-4xl font-bold text-primary leading-tight">
-            Commitment to Quality, <br />Driven by Integrity.
-          </h2>
-          <p className="text-gray-600 text-lg">
-            With years of expertise, OBRUS APEX SERVICES has grown into a multi-disciplinary service provider. 
-            We don't just provide services; we build strategic partnerships that allow our clients to focus on their core business.
-          </p>
-          <ul className="space-y-4">
-            {[
-              "Adherence to International HSE Standards",
-              "Highly Skilled and Vetted Personnel",
-              "Cutting-edge Equipment and Technology",
-              "Transparent and Competitive Pricing"
-            ].map((item, i) => (
-              <li key={i} className="flex items-center gap-3 font-medium text-primary">
-                <CheckCircle2 className="text-accent w-5 h-5" /> {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-      <section className="bg-slate-50 section-padding">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-          <div className="max-w-2xl">
-            <h4 className="text-accent font-bold tracking-[0.2em] uppercase text-sm mb-2">Expertise</h4>
-            <h2 className="text-4xl font-bold text-primary">Our Operational Pillars</h2>
-          </div>
-          <Link href="/services" className="text-primary font-bold flex items-center gap-2 hover:text-accent transition-colors">
-            View All Services <ChevronRight className="w-5 h-5" />
-          </Link>
+      </div>
+
+      <section className="py-24 px-[5%] max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <div className="text-gold text-[11px] font-bold tracking-[0.2em] uppercase mb-2">What We Offer</div>
+          <h2 className="font-serif text-4xl md:text-5xl font-bold">Six Divisions of Integrated Service</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
-            { 
-              title: "Recruitment & Outsourcing", 
-              desc: "Connecting top-tier talent with organizations through rigorous vetting.",
-              icon: <Users className="w-10 h-10" /> 
-            },
-            { 
-              title: "Waste Management", 
-              desc: "Comprehensive refuse evacuation and environmental sanitation services.",
-              icon: <Trash2 className="w-10 h-10" /> 
-            },
-            { 
-              title: "HSE Consultancy", 
-              desc: "Professional safety training and industrial compliance advisory.",
-              icon: <ShieldCheck className="w-10 h-10" /> 
-            },
-            { 
-              title: "Facility Maintenance", 
-              desc: "End-to-end general maintenance and structural management.",
-              icon: <Briefcase className="w-10 h-10" /> 
-            },
-            { 
-              title: "Cleaning & Fumigation", 
-              desc: "Industrial grade janitorial services and pest control solutions.",
-              icon: <CheckCircle2 className="w-10 h-10" /> 
-            },
-            { 
-              title: "Procurement & Supply", 
-              desc: "Provision of high-quality safety equipment and industrial PPE.",
-              icon: <BarChart3 className="w-10 h-10" /> 
-            },
-          ].map((s, i) => (
-            <div key={i} className="bg-white p-10 rounded-xl border border-gray-100 hover:shadow-2xl transition-all group">
-              <div className="text-accent mb-6 group-hover:scale-110 transition-transform duration-300 italic">
-                {s.icon}
+            { title: "Recruitment & Manpower", icon: <Users />, color: "border-gold", iconBg: "bg-gold/10" },
+            { title: "Environmental Services", icon: <ShieldCheck />, color: "border-green", iconBg: "bg-green/10" },
+            { title: "Equipment Procurement", icon: <Briefcase />, color: "border-gold", iconBg: "bg-gold/10" },
+            { title: "HSE Consultancy", icon: <Star />, color: "border-navy", iconBg: "bg-navy/10" },
+            { title: "Facility Maintenance", icon: <Lightbulb />, color: "border-gold", iconBg: "bg-gold/10" },
+            { title: "General Consulting", icon: <Star />, color: "border-navy", iconBg: "bg-navy/10" },
+          ].map((svc, i) => (
+            <div key={i} className={`bg-white p-8 rounded-2xl border-t-4 ${svc.color} shadow-sm hover:-translate-y-2 transition-all duration-300 group`}>
+              <div className={`w-12 h-12 ${svc.iconBg} rounded-xl flex items-center justify-center text-navy mb-6 group-hover:scale-110 transition-transform`}>
+                {svc.icon}
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-primary">{s.title}</h3>
-              <p className="text-gray-500 leading-relaxed mb-6">{s.desc}</p>
-              <Link href="/services" className="inline-flex items-center text-sm font-bold text-primary group-hover:text-accent">
-                Read More <ArrowRight className="w-4 h-4 ml-2" />
+              <h3 className="font-serif text-xl font-bold mb-3">{svc.title}</h3>
+              <p className="text-slate text-sm leading-relaxed mb-6">Expert solutions tailored for operational excellence and industrial compliance.</p>
+              <Link href="#" className="text-gold font-bold text-xs flex items-center gap-2 group-hover:gap-4 transition-all">
+                Read More <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           ))}
         </div>
       </section>
 
-     
-      <section className="bg-primary py-24 px-6 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-1/3 h-full bg-accent/10 skew-x-12 translate-x-20" />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Build Your Career With Us</h2>
-          <p className="text-gray-300 text-lg mb-10">
-            We are always looking for dedicated professionals to join our growing team. 
-            Check our latest job openings and take the next step in your career.
-          </p>
-          <Link href="/jobs" className="bg-accent text-primary px-10 py-4 rounded-md font-bold text-lg hover:bg-white transition-colors inline-block">
-            Browse Job Vacancies
-          </Link>
+      <section className="bg-navy py-24 px-[5%]">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-8">
+            <h2 className="font-serif text-4xl text-white font-bold">Built on Trust. Delivered with Precision.</h2>
+            <div className="grid gap-6">
+              {[
+                { n: "01", t: "Certified Professionals", d: "Every operative is verified and trained before deployment." },
+                { n: "02", t: "Integrated Partnership", d: "One partner, six divisions of professional accountability." },
+              ].map((item, i) => (
+                <div key={i} className="flex gap-4">
+                  <div className="w-10 h-10 shrink-0 bg-gold text-navy flex items-center justify-center font-bold rounded-lg">{item.n}</div>
+                  <div>
+                    <h4 className="text-white font-bold mb-1">{item.t}</h4>
+                    <p className="text-white/40 text-sm">{item.d}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="relative h-80 bg-white/5 rounded-3xl border border-gold/20 backdrop-blur-sm hidden lg:block" />
         </div>
       </section>
-
     </div>
   );
 }
