@@ -1,8 +1,10 @@
-import type { Config } from "next";
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
@@ -21,7 +23,10 @@ const config: Config = {
           lt: "#28a866",
         },
         cream: "#f5f0e8",
-        slate: "#8494aa",
+        slate: {
+          DEFAULT: "#8494aa",
+          800: "#1e293b",
+        }
       },
       fontFamily: {
         serif: ["Cormorant Garamond", "serif"],
