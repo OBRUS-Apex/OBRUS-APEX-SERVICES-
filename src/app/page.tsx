@@ -52,8 +52,8 @@ export default function LandingPage() {
               Port Harcourt, Nigeria · Est. 2024
             </div>
             <h1 className="font-serif text-5xl md:text-7xl text-white font-bold leading-[1.1] mb-6">
-              Integrated Services. <br />
-              <span className="text-gold-lt italic">Exceptional Standards.</span>
+              Recruitment, Environmental <br />
+              <span className="text-gold-lt italic"> & Technical Solutions You Can Trust</span>
             </h1>
             <p className="text-white/60 text-lg leading-relaxed mb-10 max-w-lg">
               OBRUS Apex Services delivers recruitment, environmental management, and technical consultancy built on integrity and accountability.
