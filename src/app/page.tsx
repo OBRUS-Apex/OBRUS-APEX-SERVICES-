@@ -56,7 +56,7 @@ export default function LandingPage() {
               <span className="text-gold-lt italic"> & Technical Solutions You Can Trust</span>
             </h1>
             <p className="text-white/60 text-lg leading-relaxed mb-10 max-w-lg">
-              OBRUS Apex Services delivers recruitment, environmental management, and technical consultancy built on integrity and accountability.
+              OBRUS Apex Services is a trusted provider of recruitment, environmental management, and technical consultancy solutions. We partner with businesses to deliver skilled professionals, sustainable environmental practices, and expert advisory services that drive operational excellence.
             </p>
             <div className="flex flex-wrap gap-4 mb-12">
               <Link href="/recruitment" className="bg-gradient-to-r from-gold to-gold-lt text-navy px-8 py-3.5 rounded-full font-bold text-sm shadow-lg shadow-gold/20 hover:-translate-y-1 transition-all">
