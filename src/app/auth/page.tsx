@@ -123,7 +123,7 @@ export default function AuthPage() {
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em] ml-1">Password</label>
-                {isLogin && <Link href="/forgot-password" size="sm" className="text-[10px] text-[#c8921e] font-bold uppercase tracking-widest hover:text-[#e8b84b]">Forgot?</Link>}
+                {isLogin && <Link href="/forgot-password"  className="text-[10px] text-[#c8921e] font-bold uppercase tracking-widest hover:text-[#e8b84b]">Forgot?</Link>}
               </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-3.5 w-4.5 h-4.5 text-white/20" />
