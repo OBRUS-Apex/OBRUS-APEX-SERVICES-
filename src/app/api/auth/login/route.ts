@@ -4,6 +4,7 @@ import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+
 export async function POST(req: Request) {
   try {
     await dbConnect();
