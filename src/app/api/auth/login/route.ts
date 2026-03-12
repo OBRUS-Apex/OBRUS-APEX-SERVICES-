@@ -11,12 +11,12 @@ export async function POST(req: Request) {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 400 });
+      return NextResponse.json({ message: "Invalid credentials" }, { status: 400 });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    if (!isPasswordCorrect) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 400 });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return NextResponse.json({ message: "Invalid credentials" }, { status: 400 });
     }
 
     const token = jwt.sign(
@@ -27,14 +27,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
+      user: { id: user._id, name: user.name, role: user.role }
     }, { status: 200 });
   } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Login failed" }, { status: 500 });
   }
 }
