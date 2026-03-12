@@ -30,6 +30,7 @@ export default function AuthPage() {
     setLoading(true);
     setError('');
 
+    
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
 
     try {
@@ -38,6 +39,13 @@ export default function AuthPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+
+      
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server communication error. Please ensure environment variables (MONGODB_URI) are set in the dashboard.");
+      }
+
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.message || 'Authentication failed');
@@ -46,12 +54,13 @@ export default function AuthPage() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
+        
         if (data.user.role === 'admin') window.location.href = '/admin/dashboard';
         else if (data.user.role === 'staff') window.location.href = '/staff/portal';
         else window.location.href = '/portal/client';
       } else {
         setIsLogin(true);
-        alert("Registration successful. Please sign in.");
+        alert("Account created successfully. Please sign in.");
       }
     } catch (err: any) {
       setError(err.message);
@@ -65,7 +74,7 @@ export default function AuthPage() {
       <div className="absolute inset-0 opacity-[0.03] hero-grid"></div>
       <div className="absolute w-[500px] h-[500px] bg-[#c8921e]/10 rounded-full blur-[120px] -top-40 -right-40"></div>
 
-      <div className="relative w-full max-w-[440px]">
+      <div className="relative w-full max-w-[440px] animate-fade-in">
         <div className="bg-[#0b1f3a]/90 backdrop-blur-2xl border border-[#c8921e]/20 rounded-[28px] p-10 shadow-2xl">
           <div className="text-center mb-8">
             <div className="flex justify-center items-center gap-3 mb-6">
@@ -123,7 +132,7 @@ export default function AuthPage() {
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em] ml-1">Password</label>
-                {isLogin && <Link href="/forgot-password"  className="text-[10px] text-[#c8921e] font-bold uppercase tracking-widest hover:text-[#e8b84b]">Forgot?</Link>}
+                {isLogin && <Link href="/forgot-password" size="sm" className="text-[10px] text-[#c8921e] font-bold uppercase tracking-widest hover:text-[#e8b84b]">Forgot?</Link>}
               </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-3.5 w-4.5 h-4.5 text-white/20" />
@@ -138,7 +147,7 @@ export default function AuthPage() {
                   }}
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-white/20">
-                  {showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
 
@@ -148,7 +157,7 @@ export default function AuthPage() {
                     <div 
                       key={i} 
                       className={`h-1 flex-1 rounded-full transition-all duration-500 ${
-                        i < strength ? (strength <= 2 ? 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]' : 'bg-[#1a7a4a] shadow-[0_0_8px_rgba(26,122,74,0.4)]') : 'bg-white/5'
+                        i < strength ? (strength <= 2 ? 'bg-orange-500' : 'bg-[#1a7a4a]') : 'bg-white/5'
                       }`} 
                     />
                   ))}
@@ -166,9 +175,9 @@ export default function AuthPage() {
           </form>
 
           <div className="mt-8 pt-8 border-t border-white/5 text-center">
-            <button onClick={() => setIsLogin(!isLogin)} className="text-white/40 text-[13px] font-medium transition-all group">
+            <button onClick={() => setIsLogin(!isLogin)} className="text-white/40 text-[13px] font-medium group transition-all">
               {isLogin ? "New to the platform?" : "Joined us before?"} 
-              <span className="text-[#c8921e] font-bold ml-1">{isLogin ? 'Register' : 'Login'}</span>
+              <span className="text-[#c8921e] font-bold ml-1 transition-colors">{isLogin ? 'Register' : 'Login'}</span>
             </button>
           </div>
         </div>
