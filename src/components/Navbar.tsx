@@ -96,7 +96,7 @@ const Navbar = () => {
           </Link>
         ))}
         <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-white/10">
-          <Link href="/login" onClick={() => setIsOpen(false)} className="text-white border border-white/20 text-center py-3 rounded-lg font-bold">
+          <Link href="/auth" onClick={() => setIsOpen(false)} className="text-white border border-white/20 text-center py-3 rounded-lg font-bold">
             Login
           </Link>
           <Link href="/contact" onClick={() => setIsOpen(false)} className="bg-gold text-navy text-center py-3 rounded-lg font-bold">
