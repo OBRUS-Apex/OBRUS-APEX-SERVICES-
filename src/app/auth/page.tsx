@@ -29,7 +29,6 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
     
-   
     const authToast = toast.loading(isLogin ? "Authenticating..." : "Creating account...");
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
@@ -56,7 +55,6 @@ export default function AuthPage() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
-        
         setTimeout(() => {
           if (data.user.role === 'admin') window.location.href = '/admin/dashboard';
           else if (data.user.role === 'staff') window.location.href = '/staff/portal';
@@ -92,7 +90,7 @@ export default function AuthPage() {
             <h2 className="font-serif text-3xl text-white font-bold tracking-tight">
               {isLogin ? 'Secure Access' : 'Create Account'}
             </h2>
-            <p className="text-white/40 text-sm mt-2 font-medium">
+            <p className="text-white/40 text-sm mt-2 font-medium text-center">
               {isLogin ? 'Integrated Portal Access' : 'Register for OBRUS Apex Services'}
             </p>
           </div>
@@ -104,7 +102,7 @@ export default function AuthPage() {
                  <input 
                   type="text" 
                   required
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none transition-all placeholder:text-white/20"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none transition-all"
                   placeholder="e.g John Doe"
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                 />
@@ -116,7 +114,7 @@ export default function AuthPage() {
               <input 
                 type="email" 
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none transition-all placeholder:text-white/20"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none transition-all"
                 placeholder="name@obrusapex.com"
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
               />
@@ -138,14 +136,14 @@ export default function AuthPage() {
                 <input 
                   type={showPassword ? "text" : "password"} 
                   required
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none placeholder:text-white/20"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none"
                   placeholder="••••••••"
                   onChange={(e) => {
                     setFormData({...formData, password: e.target.value});
                     if (!isLogin) checkStrength(e.target.value);
                   }}
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-white/20 hover:text-gold transition-colors">
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-white/20">
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
@@ -168,25 +166,17 @@ export default function AuthPage() {
               disabled={loading}
               className="w-full mt-4 bg-gradient-to-r from-[#c8921e] to-[#e8b84b] text-[#060f1e] py-4 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 hover:-translate-y-1 transition-all disabled:opacity-50"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                <span className="flex items-center gap-2">
-                   {isLogin ? 'SIGN IN' : 'CREATE ACCOUNT'} <ArrowRight size={16}/>
-                </span>
-              )}
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'SUBMIT'}
             </button>
           </form>
 
           <div className="mt-8 text-center border-t border-white/5 pt-6">
             <button onClick={() => setIsLogin(!isLogin)} className="text-white/40 text-[13px] font-medium transition-all group">
-              {isLogin ? "Accessing for the first time?" : "Return to security gate?"} 
+              {isLogin ? "Accessing for the first time?" : "Return to login?"} 
               <span className="text-[#c8921e] font-bold ml-1">{isLogin ? 'Register Here' : 'Login Now'}</span>
             </button>
           </div>
         </div>
-
-        <Link href="/" className="flex items-center justify-center gap-2 text-white/20 text-[11px] font-bold uppercase tracking-[0.2em] mt-8 hover:text-[#c8921e] transition-colors">
-          ← Back to Site
-        </Link>
       </div>
     </div>
   );
