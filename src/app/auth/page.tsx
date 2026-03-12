@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, Mail, User, ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [strength, setStrength] = useState(0);
 
   const [formData, setFormData] = useState({
@@ -28,7 +28,9 @@ export default function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    
+   
+    const authToast = toast.loading(isLogin ? "Authenticating..." : "Creating account...");
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
 
@@ -41,25 +43,32 @@ export default function AuthPage() {
 
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Server communication error. Check Database Connection.");
+        throw new Error("System configuration error. Connection failed.");
       }
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Authentication failed');
+
+      if (!res.ok) throw new Error(data.message || 'Action failed');
 
       if (isLogin) {
+        toast.success(`Welcome back, ${data.user.name}`, { id: authToast });
+        
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
+
         
-        if (data.user.role === 'admin') window.location.href = '/admin/dashboard';
-        else if (data.user.role === 'staff') window.location.href = '/staff/portal';
-        else window.location.href = '/portal/client';
+        setTimeout(() => {
+          if (data.user.role === 'admin') window.location.href = '/admin/dashboard';
+          else if (data.user.role === 'staff') window.location.href = '/staff/portal';
+          else window.location.href = '/portal/client';
+        }, 1200);
+
       } else {
+        toast.success("Account created! Please sign in.", { id: authToast });
         setIsLogin(true);
-        alert("Account created. Please sign in.");
       }
     } catch (err: any) {
-      setError(err.message);
+      toast.error(err.message || "An unexpected error occurred", { id: authToast });
     } finally {
       setLoading(false);
     }
@@ -83,36 +92,39 @@ export default function AuthPage() {
             <h2 className="font-serif text-3xl text-white font-bold tracking-tight">
               {isLogin ? 'Secure Access' : 'Create Account'}
             </h2>
+            <p className="text-white/40 text-sm mt-2 font-medium">
+              {isLogin ? 'Integrated Portal Access' : 'Register for OBRUS Apex Services'}
+            </p>
           </div>
-
-          {error && (
-            <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3.5 rounded-xl">
-              <ShieldCheck className="w-4 h-4 inline mr-2" /> {error}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <input 
-                type="text" 
-                required
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none transition-all"
-                placeholder="Full Name"
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-              />
+              <div className="space-y-1">
+                 <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Full Name</label>
+                 <input 
+                  type="text" 
+                  required
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none transition-all placeholder:text-white/20"
+                  placeholder="e.g John Doe"
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                />
+              </div>
             )}
 
-            <input 
-              type="email" 
-              required
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none transition-all"
-              placeholder="Email Address"
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-            />
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Email Address</label>
+              <input 
+                type="email" 
+                required
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none transition-all placeholder:text-white/20"
+                placeholder="name@obrusapex.com"
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+              />
+            </div>
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-center px-1">
-                <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em]">Password</label>
+                <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Password</label>
                 {isLogin && (
                   <Link 
                     href="/forgot-password" 
@@ -126,34 +138,55 @@ export default function AuthPage() {
                 <input 
                   type={showPassword ? "text" : "password"} 
                   required
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-[#c8921e] outline-none placeholder:text-white/20"
                   placeholder="••••••••"
                   onChange={(e) => {
                     setFormData({...formData, password: e.target.value});
                     if (!isLogin) checkStrength(e.target.value);
                   }}
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-white/20">
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-white/20 hover:text-gold transition-colors">
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+
+              {!isLogin && (
+                <div className="flex gap-1.5 mt-3 px-1">
+                  {[...Array(4)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`h-1 flex-1 rounded-full transition-all duration-500 ${
+                        i < strength ? (strength <= 2 ? 'bg-orange-500' : 'bg-[#1a7a4a]') : 'bg-white/5'
+                      }`} 
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             <button 
               disabled={loading}
               className="w-full mt-4 bg-gradient-to-r from-[#c8921e] to-[#e8b84b] text-[#060f1e] py-4 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 hover:-translate-y-1 transition-all disabled:opacity-50"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : isLogin ? 'SIGN IN' : 'CREATE ACCOUNT'}
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                <span className="flex items-center gap-2">
+                   {isLogin ? 'SIGN IN' : 'CREATE ACCOUNT'} <ArrowRight size={16}/>
+                </span>
+              )}
             </button>
           </form>
 
           <div className="mt-8 text-center border-t border-white/5 pt-6">
             <button onClick={() => setIsLogin(!isLogin)} className="text-white/40 text-[13px] font-medium transition-all group">
-              {isLogin ? "New here?" : "Joined before?"} 
-              <span className="text-[#c8921e] font-bold ml-1">{isLogin ? 'Register' : 'Login'}</span>
+              {isLogin ? "Accessing for the first time?" : "Return to security gate?"} 
+              <span className="text-[#c8921e] font-bold ml-1">{isLogin ? 'Register Here' : 'Login Now'}</span>
             </button>
           </div>
         </div>
+
+        <Link href="/" className="flex items-center justify-center gap-2 text-white/20 text-[11px] font-bold uppercase tracking-[0.2em] mt-8 hover:text-[#c8921e] transition-colors">
+          ← Back to Site
+        </Link>
       </div>
     </div>
   );
