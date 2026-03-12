@@ -16,6 +16,7 @@
     "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3",
     "nodemailer": "^6.9.16",
+    "react-hot-toast": "^2.4.1",
     "lucide-react": "^0.454.0",
     "framer-motion": "^11.11.9",
     "clsx": "^2.1.1",
