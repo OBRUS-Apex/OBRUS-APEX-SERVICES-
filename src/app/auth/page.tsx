@@ -81,7 +81,16 @@ export default function AuthPage() {
         <div className="bg-[#0b1f3a]/90 backdrop-blur-2xl border border-[#c8921e]/20 rounded-[28px] p-10 shadow-2xl">
           <div className="text-center mb-8">
             <div className="flex justify-center items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-[#c8921e] rounded-xl flex items-center justify-center font-bold text-[#0b1f3a] text-2xl shadow-lg uppercase">O</div>
+                        <div className="relative w-12 h-12 flex items-center justify-center bg-white/5 rounded-xl border border-gold/20 p-1">
+            <img 
+              src="/logo.png" 
+              alt="OBRUS Logo" 
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/1063/1063251.png";
+              }}
+            />
+          </div>
               <div className="text-left leading-none">
                 <span className="block font-serif text-white text-xl font-bold tracking-tight uppercase">OBRUS</span>
                 <span className="text-[10px] text-[#e8b84b] uppercase tracking-[0.2em] font-bold">Apex Services</span>
