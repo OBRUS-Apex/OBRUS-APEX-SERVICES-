@@ -200,7 +200,7 @@ export default function AuthPage() {
                 <div className="flex justify-between items-center px-1">
                   <label className="text-[10px] font-black text-white/20 uppercase tracking-widest">Secret Credentials</label>
                   {isLogin && (
-                    <Link href="/forgot-password" size="sm" className="text-[10px] text-[#c8921e] font-black uppercase tracking-widest hover:text-[#e8b84b]">Rescue?</Link>
+                    <Link href="/forgot-password"  className="text-[10px] text-[#c8921e] font-black uppercase tracking-widest hover:text-[#e8b84b]">forgotten password?</Link>
                   )}
                 </div>
                 <div className="relative">
