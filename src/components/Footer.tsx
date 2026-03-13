@@ -14,7 +14,16 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-[5%] pt-20 pb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gold rounded flex items-center justify-center font-bold text-navy text-xl">O</div>
+                        <div className="relative w-12 h-12 flex items-center justify-center bg-white/5 rounded-xl border border-gold/20 p-1">
+            <img 
+              src="/logo.png" 
+              alt="OBRUS Logo" 
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/1063/1063251.png";
+              }}
+            />
+          </div>
               <div className="flex flex-col">
                 <span className="font-serif font-bold text-white text-xl leading-none">OBRUS</span>
                 <span className="text-gold-lt text-[10px] uppercase tracking-widest">Apex Services</span>
