@@ -54,12 +54,9 @@ export default function LandingPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center gap-2 bg-[#c8921e]/10 border border-[#c8921e]/20 px-4 py-1.5 rounded-full text-[#e8b84b] text-[10px] uppercase tracking-[0.2em] font-bold mb-8">
-              <span className="w-2 h-2 rounded-full bg-[#c8921e] animate-pulse" />
-              Integrated Corporate Solutions
-            </div>
+            
             <h1 className="font-serif text-5xl md:text-7xl text-white font-bold leading-[1.1] mb-8">
-              Integrated Services. <br />
+              Apex Services. <br />
               <span className="text-[#c8921e] italic font-medium">Exceptional Standards.</span>
             </h1>
             <p className="text-white/50 text-lg leading-relaxed mb-10 max-w-xl">
