@@ -41,7 +41,7 @@ export default function AdminDashboard() {
     try {
       const [sRes, uRes, eRes] = await Promise.all([
         fetch('/api/admin/stats'),
-        fetch('/api/admin/users'),
+        fetch('/api/admin/user'),
         fetch('/api/admin/hse')
       ]);
 
@@ -64,7 +64,7 @@ export default function AdminDashboard() {
   const handleUpdateRole = async (userId: string, userName: string, newRole: string) => {
     const load = toast.loading(`Upgrading Access: ${userName}...`);
     try {
-      const res = await fetch('/api/admin/users', {
+      const res = await fetch('/api/admin/user', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, newRole })
