@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 export async function GET() {
   return NextResponse.json({ 
     status: "active", 
-    message: "Registration endpoint is live. Submit a POST request with name, email, and password." 
+    message: "Registration endpoint is live." 
   });
 }
 
@@ -21,11 +21,19 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    await User.create({ name, email, password: hashedPassword });
+    
+    const role = email === process.env.ADMIN_EMAIL ? 'admin' : 'client';
+
+    await User.create({ 
+      name, 
+      email, 
+      password: hashedPassword, 
+      role 
+    });
 
     return NextResponse.json({ 
       success: true, 
-      message: "Registration completed successfully" 
+      message: `Account created successfully as ${role}` 
     }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ 
