@@ -19,6 +19,9 @@ const UserSchema = new mongoose.Schema({
     enum: ['admin', 'staff', 'client'], 
     default: 'client' 
   },
+  status: { type: String, enum: ['active',         'pending', 'deactivated'],
+    default: 'active'
+  },
   resetPasswordToken: {
     type: String,
     default: null
