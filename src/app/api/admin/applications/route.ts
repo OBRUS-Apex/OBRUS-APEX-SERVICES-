@@ -5,7 +5,7 @@ import Application from '@/models/Application';
 export async function PATCH(req: Request) {
   try {
     await dbConnect();
-    const { applicationId, status } = await req.json(); // status: 'vetted' or 'rejected'
+    const { applicationId, status } = await req.json(); 
 
     if (!applicationId || !status) {
       return NextResponse.json({ message: "Target ID and Status required" }, { status: 400 });
