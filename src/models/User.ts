@@ -42,7 +42,7 @@ const UserSchema = new mongoose.Schema({
  
   employerProfile: {
     companyName: { type: String, default: null },
-    rcNumber: { type: String, default: null }, // Corporate Affairs Commission Number
+    rcNumber: { type: String, default: null }, 
     officeAddress: { type: String, default: null },
     industry: { type: String, default: null },
     website: { type: String, default: null },
