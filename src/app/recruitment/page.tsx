@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { 
   Search, MapPin, Briefcase, Filter, 
   Settings, Loader2, ArrowRight, X,
-  Clock, CheckCircle, Bell, ChevronRight, User as UserIcon, Mail
+  Clock, CheckCircle, Bell, ChevronRight, User as UserIcon, Mail, Phone
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
