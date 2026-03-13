@@ -102,7 +102,7 @@ export default function AdminDashboard() {
   return (
     <div className="flex min-h-screen bg-[#f0ede6] text-[#0b1f3a] overflow-hidden">
       
-      {/* SIDEBAR */}
+      
       <aside className="w-[260px] bg-[#060f1e] border-r border-gold/10 flex flex-col fixed inset-y-0 z-50">
         <div className="p-8 border-b border-white/5 flex items-center gap-4">
           <div className="w-12 h-12 bg-gold rounded-xl flex items-center justify-center font-bold text-navy text-2xl shadow-xl">O</div>
