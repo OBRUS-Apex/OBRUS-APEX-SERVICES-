@@ -5,7 +5,7 @@ import {
   Home, ClipboardList, CreditCard, Bell, 
   Plus, ChevronRight, CheckCircle, 
   Clock, FileText, Phone, Mail, Globe, 
-  Send, Loader2, DollarSign, Calendar, X, Printer, LogOut, Upload, ShieldCheck
+  Send, Loader2, DollarSign, Calendar, X, Printer, LogOut, Upload, ShieldCheck, Download
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,7 +34,7 @@ export default function MasterClientPortal() {
     const parsedUser = JSON.parse(session);
     setUser(parsedUser);
     fetchData(parsedUser._id);
-  }, []);
+  }, [router]);
 
   const fetchData = async (userId: string) => {
     try {
@@ -99,6 +99,15 @@ export default function MasterClientPortal() {
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    router.push('/auth');
+  };
+
   const totalUnpaid = Array.isArray(invoices) 
     ? invoices.filter(i => i.status === 'pending').reduce((acc, curr) => acc + curr.amount, 0)
     : 0;
@@ -130,7 +139,7 @@ export default function MasterClientPortal() {
         </nav>
 
         <div className="p-8 border-t border-white/5 bg-[#040a14]">
-           <button onClick={() => { localStorage.clear(); window.location.href='/auth'; }} className="flex items-center gap-4 text-red-400/40 hover:text-red-400 font-black text-[10px] transition-all uppercase tracking-[0.3em]">
+           <button onClick={handleLogout} className="flex items-center gap-4 text-red-400/40 hover:text-red-400 font-black text-[10px] transition-all uppercase tracking-[0.3em]">
              <LogOut size={16}/> Terminate Link
            </button>
         </div>
@@ -265,11 +274,9 @@ export default function MasterClientPortal() {
                 </table>
              </div>
           )}
-
         </div>
       </main>
 
-      {/* MODAL: SERVICE REQUEST */}
       <AnimatePresence>
         {selectedService && (
           <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-navy-deep/95 backdrop-blur-xl no-print">
@@ -287,18 +294,17 @@ export default function MasterClientPortal() {
                 </div>
                 <div className="space-y-2"><label className="ls">Target Temporal Data (Date)</label><input type="date" required className="fi" onChange={e => setRequestForm({...requestForm, targetDate: e.target.value})}/></div>
                 <div className="space-y-2"><label className="ls">Mission parameters & scope</label><textarea className="fi h-40 py-6 resize-none" required placeholder="Describe full mission briefing, staff requirements, or equipment needs..." onChange={e => setRequestForm({...requestForm, details: e.target.value})}/></div>
-                <button type="submit" className="w-full py-6 bg-navy text-white rounded-[35px] font-black text-xs uppercase tracking-[0.5em] shadow-3xl shadow-navy/30 hover:bg-gold hover:text-navy transition-all active:scale-95">Initiate Secured Request</button>
+                <button type="submit" className="w-full bg-navy text-white py-6 rounded-[35px] font-black text-xs uppercase tracking-[0.5em] shadow-3xl shadow-navy/30 hover:bg-gold hover:text-navy transition-all active:scale-95">Initiate Secured Request</button>
               </form>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* MODAL: INVOICE & PRINT */}
       <AnimatePresence>
          {selectedInvoice && (
            <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-navy-deep/98 backdrop-blur-xl no-print">
-              <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white w-full max-w-5xl rounded-[70px] shadow-2xl flex flex-col md:row overflow-hidden border border-white/5 relative h-full max-h-[90vh]">
+              <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }} className="bg-white w-full max-w-5xl rounded-[70px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-white/5 relative h-full max-h-[90vh]">
                  <div id="invoice-printable" className="flex-1 p-20 overflow-y-auto">
                     <div className="flex justify-between items-start mb-20">
                        <div className="flex items-center gap-5">
@@ -310,16 +316,16 @@ export default function MasterClientPortal() {
                        </div>
                        <div className="text-right">
                           <p className="font-black text-[10px] text-slate-300 uppercase tracking-[0.5em] mb-3 leading-none italic">Secured Document</p>
-                          <span className="text-3xl font-mono font-black tracking-tight text-navy">{selectedInvoice.id}</span>
+                          <span className="text-3xl font-mono font-black tracking-tight text-navy">{selectedInvoice.id || "ID-NODE"}</span>
                        </div>
                     </div>
                     <div className="grid grid-cols-2 gap-20 text-xs font-bold uppercase tracking-widest text-slate-500 mb-20 leading-loose border-t pt-10 border-navy/5">
                        <div><span className="text-gold-lt text-[10px] block mb-2 font-black italic decoration-gold">Entity Issuer</span><b>OBRUS Apex Integrated Services Ltd</b><br/>HQ Port Harcourt, Sector Node 4<br/>Rivers State Operations Node</div>
-                       <div><span className="text-gold-lt text-[10px] block mb-2 font-black italic decoration-gold">Recipient Node</span><b>{user?.name}</b><br/>{user?.email}<br/>Industrial Access ID: {user?._id.substring(0,8).toUpperCase()}</div>
+                       <div><span className="text-gold-lt text-[10px] block mb-2 font-black italic decoration-gold">Recipient Node</span><b>{user?.name}</b><br/>{user?.email}<br/>Industrial Access ID: {user?._id?.substring(0,8).toUpperCase()}</div>
                     </div>
                     <div className="border-y-4 border-navy py-12 mb-16 flex justify-between items-end">
                        <div><span className="text-gold font-black text-[10px] uppercase tracking-widest block mb-4 italic leading-none">Operational Items</span><h5 className="font-serif text-4xl font-bold italic tracking-tighter">{selectedInvoice.service}</h5></div>
-                       <h5 className="text-5xl font-black text-navy tracking-tighter italic underline decoration-gold/10 decoration-8 underline-offset-[-2px]">₦{selectedInvoice.amount.toLocaleString()}</h5>
+                       <h5 className="text-5xl font-black text-navy tracking-tighter italic underline decoration-gold/10 decoration-8 underline-offset-[-2px]">₦{selectedInvoice.amount?.toLocaleString()}</h5>
                     </div>
                     <div className="p-10 bg-[#f9f8f6] rounded-[40px] border border-dashed border-navy/10 text-center text-xs font-black uppercase text-navy/30 leading-loose">
                        Reconciliation Channel: Account ID 102XXXXXXXXX (Zenith Node)<br/>Vett the link in lateral console for final node validation.
@@ -327,8 +333,8 @@ export default function MasterClientPortal() {
                  </div>
 
                  <div className="w-full md:w-[380px] bg-[#f0ede6] p-16 flex flex-col no-print border-l border-navy/5">
-                    <button onClick={() => setSelectedInvoice(null)} className="ml-auto mb-16 hover:rotate-180 transition-all duration-700 bg-white p-4 rounded-full shadow-lg"><X size={24}/></button>
-                    <h3 className="font-serif text-3xl font-bold mb-3 italic tracking-tighter">Node Payment</h3>
+                    <button onClick={() => setSelectedInvoice(null)} className="ml-auto mb-16 hover:rotate-180 transition-all duration-700 bg-white p-4 rounded-full shadow-lg text-navy"><X size={24}/></button>
+                    <h3 className="font-serif text-3xl font-bold mb-3 italic tracking-tighter text-navy">Node Payment</h3>
                     <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mb-12 italic leading-relaxed">Identity confirmation and bank receipt upload required.</p>
                     <form onSubmit={handleReceiptUpload} className="space-y-10 flex-1">
                        <div className="relative group">
@@ -354,13 +360,13 @@ export default function MasterClientPortal() {
          @media print {
             .no-print { display: none !important; }
             main { margin-left: 0 !important; width: 100% !important; padding: 0 !important; }
-            #invoice-printable { border: none !important; padding: 50px !important; position: absolute; top: 0; left: 0; }
-            .h-screen { height: auto !important; }
-            h2, h4, p { color: black !important; font-weight: bold; }
+            #invoice-printable { border: none !important; padding: 50px !important; position: absolute; top: 0; left: 0; background: white; z-index: 10000; }
+            .h-screen { height: auto !important; overflow: visible !important; }
+            h2, h3, h4, h5, p, span, b { color: black !important; font-weight: bold; }
          }
          .fi { width: 100%; background: #f9f8f6; border: 1.5px solid rgba(11,31,58,0.03); padding: 22px 28px; border-radius: 25px; font-size: 14px; font-weight: 700; color: #0b1f3a; outline: none; transition: 0.4s; }
          .fi:focus { border-color: #c8921e; background: white; box-shadow: 0 10px 40px rgba(200,146,30,0.06); }
-         .ls { font-[10px] font-black uppercase text-navy/20 ml-6 tracking-[0.25em] block mb-2; }
+         .ls { font-size: 10px; font-weight: 900; text-transform: uppercase; color: rgba(11,31,58,0.2); margin-left: 1.5rem; letter-spacing: 0.25em; display: block; margin-bottom: 0.5rem; }
          .custom-scrollbar::-webkit-scrollbar { width: 4px; }
          .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(200, 146, 30, 0.2); border-radius: 10px; }
       `}</style>
