@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Plus, Briefcase, Users, X, Send, Loader2, DollarSign, MapPin, 
-  ChevronRight, CheckCircle, ShieldAlert, FileText, Lock, Mail, 
+  ChevronRight, CheckCircle, ShieldAlert, FileText, Lock, Mail, ShieldCheck,  
   Phone, Calendar, Globe, Bell, LogOut, CreditCard, Home 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
