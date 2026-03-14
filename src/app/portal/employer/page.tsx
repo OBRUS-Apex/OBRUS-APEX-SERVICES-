@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Briefcase, Users, X, Send, Loader2, DollarSign, MapPin, ChevronRight, CheckCircle, ShieldAlert, FileText, Lock, Mail, Phone, Calendar, Globe, Bell, LogOut, Home} from 'lucide-react';
+import { Plus, Briefcase, Users, X, Send, Loader2, DollarSign, MapPin, ChevronRight, CheckCircle, ShieldAlert, FileText, Lock, Mail, Phone, Calendar, Globe, Bell, LogOut, Home, CreditCard} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function EmployerPortal() {
