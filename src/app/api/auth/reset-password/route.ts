@@ -1,30 +1,28 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
-import bcrypt from "bcryptjs";
+import { sendResetEmail } from "@/lib/mail";
+import crypto from "crypto";
 
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const { token, password } = await req.json();
+    const { email } = await req.json();
 
-    const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() },
-    });
-
+    const user = await User.findOne({ email });
     if (!user) {
-      return NextResponse.json({ message: "Invalid or expired token" }, { status: 400 });
+      return NextResponse.json({ message: "Security Notice: Verification process initiated" }); 
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
-    user.password = hashedPassword;
-    user.resetPasswordToken = null; 
-    user.resetPasswordExpires = null; 
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; 
     await user.save();
 
-    return NextResponse.json({ message: "Password updated successfully" });
+    await sendResetEmail(email, resetToken);
+
+    return NextResponse.json({ message: "Authentication link dispatched to inbox" });
   } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Gateway Communication Error" }, { status: 500 });
   }
 }
