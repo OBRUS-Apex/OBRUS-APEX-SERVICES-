@@ -143,7 +143,7 @@ export default function AuthPage() {
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
                   <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Password</label>
-                  {isLogin && <Link href="/forgot-password" size="sm" className="text-[10px] text-gold font-black uppercase hover:text-white transition-colors">Rescue Credentials?</Link>}
+                  {isLogin && <Link href="/forgot-password"  className="text-[10px] text-gold font-black uppercase hover:text-white transition-colors">Rescue Credentials?</Link>}
                 </div>
                 <div className="relative">
                   <input type={showPassword ? "text" : "password"} required className="ai" placeholder="••••••••" onChange={(e) => { setFormData({...formData, password: e.target.value}); if (!isLogin) checkStrength(e.target.value); }} />
