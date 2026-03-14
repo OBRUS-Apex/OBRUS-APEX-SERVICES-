@@ -1,68 +1,30 @@
 import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
-  name: { 
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  phone: { type: String, default: "" },
+  userType: { 
     type: String, 
-    required: true 
+    enum: ['candidate', 'employer', 'service'], 
+    required: [true, 'Please specify your account purpose'] 
   },
-  email: { 
-    type: String, 
-    required: true, 
-    unique: true 
-  },
-  password: { 
-    type: String, 
-    required: true 
-  },
-  phone: {
-    type: String,
-    default: ""
-  },
-
-  userType: {
-    type: String,
-    enum: ['candidate', 'employer'],
-    required: true
-  },
-
-  
-  role: { 
-    type: String, 
-    enum: ['admin', 'staff', 'client'], 
-    default: 'client' 
-  },
-
-  
+  role: { type: String, enum: ['admin', 'staff', 'client'], default: 'client' },
   status: { 
     type: String, 
     enum: ['active', 'pending', 'deactivated', 'rejected'],
     default: 'active' 
   },
-
- 
   employerProfile: {
-    companyName: { type: String, default: null },
-    rcNumber: { type: String, default: null }, 
-    officeAddress: { type: String, default: null },
-    industry: { type: String, default: null },
-    website: { type: String, default: null },
-    isApproved: { type: Boolean, default: false }
+    companyName: { type: String },
+    rcNumber: { type: String },
+    officeAddress: { type: String },
+    industry: { type: String },
   },
-
- 
-  resetPasswordToken: {
-    type: String,
-    default: null
-  },
-  resetPasswordExpires: {
-    type: Date,
-    default: null
-  },
-  
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  }
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpires: { type: Date, default: null },
+  createdAt: { type: Date, default: Date.now }
 });
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);
