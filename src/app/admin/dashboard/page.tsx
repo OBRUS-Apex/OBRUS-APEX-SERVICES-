@@ -27,7 +27,7 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const [uRes, aRes, hRes, sRes, srRes] = await Promise.all([
-        fetch('/api/admin/user'),           // FIX: was '/api/admin/users'
+        fetch('/api/admin/user'),
         fetch('/api/applications'),
         fetch('/api/admin/hse'),
         fetch('/api/admin/stats'),
@@ -305,8 +305,8 @@ export default function AdminDashboard() {
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <Stat val={enquiries.length} label="Total Enquiries" sub="All time" />
-                <Stat val={enquiries.filter(e => !e.status || e.status === 'pending').length} label="Awaiting Response" sub="Needs attention" />
-                <Stat val={enquiries.filter(e => e.status === 'resolved').length} label="Resolved" sub="Closed tickets" />
+                <Stat val={enquiries.filter(e => e.status === 'Pending').length} label="Awaiting Contact" sub="Needs attention" />
+                <Stat val={enquiries.filter(e => e.status === 'Closed').length} label="Closed" sub="Resolved tickets" />
               </div>
               <div className="bg-white rounded-[60px] shadow-3xl border border-navy/5 overflow-hidden">
                 <div className="p-10 border-b border-navy/5 flex items-center justify-between bg-[#fcfbf9]">
@@ -318,7 +318,8 @@ export default function AdminDashboard() {
                     <tr>
                       <th className="p-7 text-[10px] font-black tracking-widest">Enquirer</th>
                       <th className="p-7 text-[10px] font-black tracking-widest">Contact</th>
-                      <th className="p-7 text-[10px] font-black tracking-widest">Message</th>
+                      <th className="p-7 text-[10px] font-black tracking-widest">Service Requested</th>
+                      <th className="p-7 text-[10px] font-black tracking-widest">Details</th>
                       <th className="p-7 text-[10px] font-black tracking-widest">Date</th>
                       <th className="p-7 text-[10px] font-black tracking-widest">Status</th>
                       <th className="p-7 text-[10px] font-black tracking-widest text-right">Actions</th>
@@ -326,40 +327,53 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody className="divide-y divide-[#f0ede6]">
                     {enquiries.length === 0 && (
-                      <tr><td colSpan={6} className="p-20 text-center text-slate-400 italic text-xs uppercase tracking-widest">No enquiries received yet.</td></tr>
+                      <tr><td colSpan={7} className="p-20 text-center text-slate-400 italic text-xs uppercase tracking-widest">No enquiries received yet.</td></tr>
                     )}
                     {enquiries.map((enq: any) => (
-                      <tr key={enq._id} className="hover:bg-gold/[0.02] transition-colors">
+                      <tr key={enq._id} className="hover:bg-gold/[0.02] transition-colors align-top">
                         <td className="p-7">
                           <span className="block font-black text-navy text-base">{enq.name}</span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{enq.company || '—'}</span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{enq.organisation || '—'}</span>
                         </td>
                         <td className="p-7">
                           <div className="flex flex-col gap-1">
                             <span className="text-xs font-bold text-navy flex items-center gap-1.5"><Mail size={11} className="text-gold"/> {enq.email}</span>
-                            {enq.phone && <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5"><Phone size={11}/> {enq.phone}</span>}
+                            <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5"><Phone size={11}/> {enq.phone}</span>
                           </div>
                         </td>
-                        <td className="p-7 max-w-[260px]">
-                          <p className="text-sm text-slate-600 font-medium leading-relaxed line-clamp-2">{enq.message}</p>
+                        <td className="p-7">
+                          <span className="block font-black text-navy text-sm">{enq.service}</span>
+                          {enq.participants && <span className="text-[10px] text-slate-400 font-bold">{enq.participants} participants</span>}
+                          {enq.timeline && <span className="block text-[10px] text-slate-400 font-bold mt-0.5">Timeline: {enq.timeline}</span>}
+                        </td>
+                        <td className="p-7 max-w-[220px]">
+                          <p className="text-sm text-slate-600 font-medium leading-relaxed line-clamp-2">{enq.details || '—'}</p>
                         </td>
                         <td className="p-7 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
                           {new Date(enq.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </td>
                         <td className="p-7">
-                          <span className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border ${enq.status === 'resolved' ? 'bg-green-50 text-green-600 border-green-100' : enq.status === 'in-progress' ? 'bg-blue-50 text-blue-500 border-blue-100' : 'bg-gold/10 text-gold border-gold/20 animate-pulse'}`}>
-                            {enq.status || 'pending'}
-                          </span>
+                          <span className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                            enq.status === 'Closed' ? 'bg-green-50 text-green-600 border-green-100' :
+                            enq.status === 'Contacted' ? 'bg-blue-50 text-blue-500 border-blue-100' :
+                            'bg-gold/10 text-gold border-gold/20 animate-pulse'
+                          }`}>{enq.status}</span>
                         </td>
                         <td className="p-7 text-right">
                           <div className="flex gap-2 justify-end flex-wrap">
-                            {enq.status !== 'in-progress' && (
-                              <button onClick={() => handleEnquiryStatus(enq._id, 'in-progress')} className="px-4 py-2.5 bg-blue-50 text-blue-500 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all">In Progress</button>
+                            {enq.status !== 'Contacted' && (
+                              <button onClick={() => handleEnquiryStatus(enq._id, 'Contacted')} className="px-4 py-2.5 bg-blue-50 text-blue-500 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all">
+                                Contacted
+                              </button>
                             )}
-                            {enq.status !== 'resolved' && (
-                              <button onClick={() => handleEnquiryStatus(enq._id, 'resolved')} className="px-4 py-2.5 bg-green-50 text-green-600 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">Resolve</button>
+                            {enq.status !== 'Closed' && (
+                              <button onClick={() => handleEnquiryStatus(enq._id, 'Closed')} className="px-4 py-2.5 bg-green-50 text-green-600 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">
+                                Close
+                              </button>
                             )}
-                            <button onClick={() => handleDeleteEnquiry(enq._id)} className="p-2.5 bg-red-50 text-red-400 rounded-2xl hover:bg-red-500 hover:text-white transition-all" title="Delete"><Trash2 size={14}/></button>
+                            <button onClick={() => handleDeleteEnquiry(enq._id)} className="p-2.5 bg-red-50 text-red-400 rounded-2xl hover:bg-red-500 hover:text-white transition-all" title="Delete">
+                              <Trash2 size={14}/>
+                            </button>
                           </div>
                         </td>
                       </tr>
