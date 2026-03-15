@@ -26,6 +26,8 @@ export default function EmployerPortal() {
     setUser(session);
     if (session?._id) {
       fetchEmployerJobs(session._id);
+    } else {
+      setLoading(false); // FIX: was stuck forever with no session
     }
   }, []);
 
