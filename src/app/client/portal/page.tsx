@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Home, ClipboardList, CreditCard, Bell, 
-  Plus, X, Printer, LogOut, Upload, ShieldCheck, Download, Calendar, CreditCard as CC, Menu
+  Plus, X, Printer, LogOut, Upload, ShieldCheck, Download, Calendar, Menu
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -110,11 +110,17 @@ export default function MasterClientPortal() {
 
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/60 z-[90] md:hidden" onClick={() => setSidebarOpen(false)}/>
+        <div
+          className="fixed inset-0 bg-black/60 z-[90] md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
-      {/* SIDEBAR */}
-      <aside className={`w-[280px] bg-[#060f1e] fixed inset-y-0 left-0 border-r border-gold/10 z-[100] flex flex-col no-print transition-transform duration-300 shadow-2xl ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      {/* SIDEBAR — inline style handles open state; static classes handle closed/desktop */}
+      <aside
+        style={{ transform: sidebarOpen ? 'translateX(0)' : undefined }}
+        className="w-[280px] bg-[#060f1e] fixed inset-y-0 left-0 border-r border-gold/10 z-[100] flex flex-col no-print shadow-2xl -translate-x-full md:translate-x-0 transition-transform duration-300"
+      >
         <div className="p-8 border-b border-white/5 flex items-center gap-4">
           <div className="w-12 h-12 bg-gold rounded-xl flex items-center justify-center font-black text-navy text-2xl shadow-xl uppercase italic">O</div>
           <div className="leading-tight">
@@ -143,8 +149,10 @@ export default function MasterClientPortal() {
         {/* HEADER */}
         <header className="h-[70px] md:h-[80px] bg-white border-b flex items-center justify-between px-5 md:px-12 sticky top-0 z-[50] no-print">
           <div className="flex items-center gap-4">
-            {/* Hamburger - mobile only */}
-            <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-xl border border-navy/10 text-navy/40 hover:text-gold hover:border-gold transition-all">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden p-2 rounded-xl border border-navy/10 text-navy/40 hover:text-gold hover:border-gold transition-all"
+            >
               <Menu size={20}/>
             </button>
             <h2 className="font-serif text-xl md:text-3xl font-black uppercase tracking-tighter italic decoration-gold underline-offset-[10px] underline decoration-4">
@@ -178,8 +186,12 @@ export default function MasterClientPortal() {
                 <ShieldCheck className="absolute bottom-10 right-10 text-gold/[0.05]" size={180}/>
                 <div className="relative z-10">
                   <h3 className="font-serif text-3xl md:text-5xl font-black mb-6 md:mb-8 italic tracking-tighter uppercase decoration-gold underline-offset-8 underline decoration-4">Authorization Confirmed</h3>
-                  <p className="text-white/40 text-base md:text-2xl leading-relaxed max-w-2xl font-light">Your portal environment is active. You have <b className="text-gold font-bold">industrial clearance</b> to book HSE Training, Waste Management, and Procurement services directly.</p>
-                  <button onClick={() => setActiveTab('engage')} className="mt-10 md:mt-14 bg-gradient-to-r from-gold to-gold-lt text-navy px-8 md:px-12 py-4 md:py-5 rounded-full font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:scale-105 transition-all">Establish New Request</button>
+                  <p className="text-white/40 text-base md:text-2xl leading-relaxed max-w-2xl font-light">
+                    Your portal environment is active. You have <b className="text-gold font-bold">industrial clearance</b> to book HSE Training, Waste Management, and Procurement services directly.
+                  </p>
+                  <button onClick={() => setActiveTab('engage')} className="mt-10 md:mt-14 bg-gradient-to-r from-gold to-gold-lt text-navy px-8 md:px-12 py-4 md:py-5 rounded-full font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:scale-105 transition-all">
+                    Establish New Request
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -290,20 +302,43 @@ export default function MasterClientPortal() {
       <AnimatePresence>
         {selectedService && (
           <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-navy-deep/95 backdrop-blur-xl no-print">
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white w-full max-w-2xl rounded-[40px] md:rounded-[60px] p-8 md:p-16 shadow-2xl relative overflow-y-auto max-h-[95vh] custom-scrollbar">
-              <button onClick={() => setSelectedService(null)} className="absolute top-6 right-6 md:top-12 md:right-12 bg-navy/5 p-3 md:p-4 rounded-full hover:bg-gold transition-all duration-500"><X size={22}/></button>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white w-full max-w-2xl rounded-[40px] md:rounded-[60px] p-8 md:p-16 shadow-2xl relative overflow-y-auto max-h-[95vh] custom-scrollbar"
+            >
+              <button onClick={() => setSelectedService(null)} className="absolute top-6 right-6 md:top-12 md:right-12 bg-navy/5 p-3 md:p-4 rounded-full hover:bg-gold transition-all duration-500">
+                <X size={22}/>
+              </button>
               <h3 className="font-serif text-3xl md:text-5xl font-black italic tracking-tighter uppercase mb-2">Mission Dispatch</h3>
               <p className="text-gold text-[10px] font-black uppercase tracking-[0.5em] mb-10 md:mb-14 border-l-4 border-gold pl-6">{selectedService} Node Engagement</p>
               <form onSubmit={handleRequestSubmit} className="space-y-6 md:space-y-8">
                 <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-                  <div className="space-y-2"><label className="ls">Spatial Node (Address)</label><input required className="fi" placeholder="Sector Location" onChange={e => setRequestForm({...requestForm, location: e.target.value})}/></div>
-                  <div className="space-y-2"><label className="ls">Response Index</label>
-                    <select className="fi" onChange={e => setRequestForm({...requestForm, priority: e.target.value})}><option>Normal Ops</option><option>High Priority</option><option>Urgent Dispatch</option></select>
+                  <div className="space-y-2">
+                    <label className="ls">Spatial Node (Address)</label>
+                    <input required className="fi" placeholder="Sector Location" onChange={e => setRequestForm({...requestForm, location: e.target.value})}/>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="ls">Response Index</label>
+                    <select className="fi" onChange={e => setRequestForm({...requestForm, priority: e.target.value})}>
+                      <option>Normal Ops</option>
+                      <option>High Priority</option>
+                      <option>Urgent Dispatch</option>
+                    </select>
                   </div>
                 </div>
-                <div className="space-y-2"><label className="ls">Target Temporal Data (Date)</label><input type="date" required className="fi" onChange={e => setRequestForm({...requestForm, targetDate: e.target.value})}/></div>
-                <div className="space-y-2"><label className="ls">Mission Parameters & Scope</label><textarea className="fi h-36 py-6 resize-none" required placeholder="Describe full mission briefing, staff requirements, or equipment needs..." onChange={e => setRequestForm({...requestForm, details: e.target.value})}/></div>
-                <button type="submit" className="w-full bg-navy text-white py-5 md:py-6 rounded-[30px] md:rounded-[35px] font-black text-xs uppercase tracking-[0.5em] shadow-3xl shadow-navy/30 hover:bg-gold hover:text-navy transition-all active:scale-95">Initiate Secured Request</button>
+                <div className="space-y-2">
+                  <label className="ls">Target Temporal Data (Date)</label>
+                  <input type="date" required className="fi" onChange={e => setRequestForm({...requestForm, targetDate: e.target.value})}/>
+                </div>
+                <div className="space-y-2">
+                  <label className="ls">Mission Parameters & Scope</label>
+                  <textarea className="fi h-36 py-6 resize-none" required placeholder="Describe full mission briefing, staff requirements, or equipment needs..." onChange={e => setRequestForm({...requestForm, details: e.target.value})}/>
+                </div>
+                <button type="submit" className="w-full bg-navy text-white py-5 md:py-6 rounded-[30px] md:rounded-[35px] font-black text-xs uppercase tracking-[0.5em] shadow-3xl shadow-navy/30 hover:bg-gold hover:text-navy transition-all active:scale-95">
+                  Initiate Secured Request
+                </button>
               </form>
             </motion.div>
           </div>
@@ -314,7 +349,12 @@ export default function MasterClientPortal() {
       <AnimatePresence>
         {selectedInvoice && (
           <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-navy-deep/98 backdrop-blur-xl no-print">
-            <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }} className="bg-white w-full max-w-5xl rounded-[40px] md:rounded-[70px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-white/5 relative h-full max-h-[90vh]">
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              className="bg-white w-full max-w-5xl rounded-[40px] md:rounded-[70px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-white/5 relative h-full max-h-[90vh]"
+            >
               <div id="invoice-printable" className="flex-1 p-8 md:p-20 overflow-y-auto">
                 <div className="flex justify-between items-start mb-10 md:mb-20">
                   <div className="flex items-center gap-4">
@@ -330,11 +370,20 @@ export default function MasterClientPortal() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-8 md:gap-20 text-xs font-bold uppercase tracking-widest text-slate-500 mb-10 md:mb-20 leading-loose border-t pt-8 border-navy/5">
-                  <div><span className="text-gold-lt text-[10px] block mb-2 font-black italic">Entity Issuer</span><b>OBRUS Apex Integrated Services Ltd</b><br/>HQ Port Harcourt<br/>Rivers State</div>
-                  <div><span className="text-gold-lt text-[10px] block mb-2 font-black italic">Recipient Node</span><b>{user?.name}</b><br/>{user?.email}<br/>ID: {user?._id?.substring(0, 8).toUpperCase()}</div>
+                  <div>
+                    <span className="text-gold-lt text-[10px] block mb-2 font-black italic">Entity Issuer</span>
+                    <b>OBRUS Apex Integrated Services Ltd</b><br/>HQ Port Harcourt<br/>Rivers State
+                  </div>
+                  <div>
+                    <span className="text-gold-lt text-[10px] block mb-2 font-black italic">Recipient Node</span>
+                    <b>{user?.name}</b><br/>{user?.email}<br/>ID: {user?._id?.substring(0, 8).toUpperCase()}
+                  </div>
                 </div>
                 <div className="border-y-4 border-navy py-8 md:py-12 mb-10 md:mb-16 flex justify-between items-end">
-                  <div><span className="text-gold font-black text-[10px] uppercase tracking-widest block mb-3 italic leading-none">Operational Items</span><h5 className="font-serif text-2xl md:text-4xl font-bold italic tracking-tighter">{selectedInvoice.service}</h5></div>
+                  <div>
+                    <span className="text-gold font-black text-[10px] uppercase tracking-widest block mb-3 italic leading-none">Operational Items</span>
+                    <h5 className="font-serif text-2xl md:text-4xl font-bold italic tracking-tighter">{selectedInvoice.service}</h5>
+                  </div>
                   <h5 className="text-3xl md:text-5xl font-black text-navy tracking-tighter italic">₦{selectedInvoice.amount?.toLocaleString()}</h5>
                 </div>
                 <div className="p-6 md:p-10 bg-[#f9f8f6] rounded-[30px] md:rounded-[40px] border border-dashed border-navy/10 text-center text-xs font-black uppercase text-navy/30 leading-loose">
@@ -343,7 +392,9 @@ export default function MasterClientPortal() {
               </div>
 
               <div className="w-full md:w-[380px] bg-[#f0ede6] p-8 md:p-16 flex flex-col no-print border-t md:border-t-0 md:border-l border-navy/5">
-                <button onClick={() => setSelectedInvoice(null)} className="ml-auto mb-8 md:mb-16 hover:rotate-180 transition-all duration-700 bg-white p-3 md:p-4 rounded-full shadow-lg text-navy"><X size={22}/></button>
+                <button onClick={() => setSelectedInvoice(null)} className="ml-auto mb-8 md:mb-16 hover:rotate-180 transition-all duration-700 bg-white p-3 md:p-4 rounded-full shadow-lg text-navy">
+                  <X size={22}/>
+                </button>
                 <h3 className="font-serif text-2xl md:text-3xl font-bold mb-3 italic tracking-tighter text-navy">Node Payment</h3>
                 <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8 md:mb-12 italic leading-relaxed">Identity confirmation and bank receipt upload required.</p>
                 <form onSubmit={handleReceiptUpload} className="space-y-6 md:space-y-10 flex-1">
@@ -354,11 +405,17 @@ export default function MasterClientPortal() {
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-4">{receiptFile ? receiptFile.name : 'Upload Vetting Receipt'}</p>
                     </div>
                   </div>
-                  <button type="submit" className="w-full py-4 md:py-5 bg-navy text-white rounded-[25px] font-black text-xs uppercase tracking-[0.4em] shadow-3xl hover:bg-gold transition-all active:scale-95">Vett Reconciliation →</button>
+                  <button type="submit" className="w-full py-4 md:py-5 bg-navy text-white rounded-[25px] font-black text-xs uppercase tracking-[0.4em] shadow-3xl hover:bg-gold transition-all active:scale-95">
+                    Vett Reconciliation →
+                  </button>
                 </form>
                 <div className="pt-8 md:pt-12 flex flex-col gap-3 mt-auto">
-                  <button onClick={() => window.print()} className="w-full py-3.5 bg-white text-navy rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-4 hover:bg-[#0b1f3a] hover:text-white transition-all shadow-xl"><Printer size={16}/> Print Hardcopy</button>
-                  <button className="w-full py-3.5 bg-gold text-navy rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-4 shadow-3xl hover:-translate-y-1 transition-all"><Download size={16}/> Archive Digital PDF</button>
+                  <button onClick={() => window.print()} className="w-full py-3.5 bg-white text-navy rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-4 hover:bg-[#0b1f3a] hover:text-white transition-all shadow-xl">
+                    <Printer size={16}/> Print Hardcopy
+                  </button>
+                  <button className="w-full py-3.5 bg-gold text-navy rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-4 shadow-3xl hover:-translate-y-1 transition-all">
+                    <Download size={16}/> Archive Digital PDF
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -378,6 +435,7 @@ export default function MasterClientPortal() {
         .ls { font-size: 10px; font-weight: 900; text-transform: uppercase; color: rgba(11,31,58,0.2); margin-left: 1.5rem; letter-spacing: 0.25em; display: block; margin-bottom: 0.5rem; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(200, 146, 30, 0.2); border-radius: 10px; }
+        .shadow-3xl { box-shadow: 0 40px 100px -20px rgba(11, 31, 58, 0.1); }
       `}</style>
     </div>
   );
