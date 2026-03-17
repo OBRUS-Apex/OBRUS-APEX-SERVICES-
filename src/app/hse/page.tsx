@@ -12,7 +12,7 @@ export default function HsePage() {
     <div className="min-h-screen bg-[#f5f0e8] font-sans">
 
       {/* NAV */}
-      <PublicNav active="/environmental" />
+      <PublicNav active="/hse" />
       {/* HERO */}
       <section className="pt-36 pb-20 px-6 bg-gradient-to-br from-[#060f1e] via-[#0b1a0c] to-[#1a1000] relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[radial-gradient(circle,rgba(200,146,30,0.12),transparent_68%)] pointer-events-none" />
