@@ -1,7 +1,8 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Menu, X, LogOut, User } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
@@ -13,6 +14,27 @@ const NAV_LINKS = [
 
 export default function PublicNav({ active }: { active: string }) {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const session = localStorage.getItem('user');
+    if (session) setUser(JSON.parse(session));
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setUser(null);
+    setOpen(false);
+    router.push('/');
+  };
+
+  const getPortalLink = () => {
+    if (!user) return '/auth';
+    if (user.role === 'admin') return '/admin/dashboard';
+    if (user.userType === 'employer') return '/portal/employer';
+    return '/client/portal';
+  };
 
   return (
     <nav
@@ -20,7 +42,7 @@ export default function PublicNav({ active }: { active: string }) {
       style={{ width: '100vw', right: 0 }}
     >
       {/* Top bar */}
-      <div className="px-5 h-16 flex items-center justify-between">
+      <div className="px-5 h-16 flex items-center justify-between max-w-7xl mx-auto">
         <Link href="/" className="flex items-center gap-3 shrink-0 min-w-0">
           <div className="w-8 h-8 bg-[#c8921e] rounded-lg flex items-center justify-center font-black text-[#0b1f3a] text-base italic shrink-0">O</div>
           <div className="min-w-0">
@@ -40,9 +62,36 @@ export default function PublicNav({ active }: { active: string }) {
               {label}
             </Link>
           ))}
-          <Link href="/auth" className="ml-2 px-4 py-1.5 border border-white/20 rounded-lg text-sm text-white/70 hover:text-white hover:border-white/50 transition-all">
-            Sign In
-          </Link>
+
+          <div className="w-px h-5 bg-white/10 mx-2" />
+
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href={getPortalLink()}
+                className="flex items-center gap-2 px-4 py-1.5 bg-[#c8921e]/10 border border-[#c8921e]/30 rounded-lg text-sm text-[#e8b84b] font-semibold hover:bg-[#c8921e]/20 transition-all"
+              >
+                <User size={13}/>
+                {user.name?.split(' ')[0]}
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="p-1.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-400/10 transition-all"
+                title="Sign out"
+              >
+                <LogOut size={15}/>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link href="/auth" className="px-4 py-1.5 border border-white/20 rounded-lg text-sm text-white/70 hover:text-white hover:border-white/50 transition-all">
+                Sign In
+              </Link>
+              <Link href="/auth" className="px-4 py-1.5 bg-[#c8921e] rounded-lg text-sm font-bold text-[#0b1f3a] hover:bg-[#e8b84b] transition-all">
+                Get Started
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Hamburger */}
@@ -54,7 +103,7 @@ export default function PublicNav({ active }: { active: string }) {
         </button>
       </div>
 
-      {/* Mobile menu — anchored to nav, no overflow */}
+      {/* Mobile menu */}
       {open && (
         <div className="md:hidden bg-[#060f1e] border-t border-[rgba(200,146,30,0.1)] px-5 pb-5 pt-3 flex flex-col gap-1" style={{ width: '100%' }}>
           {NAV_LINKS.map(({ href, label }) => (
@@ -67,13 +116,35 @@ export default function PublicNav({ active }: { active: string }) {
               {label}
             </Link>
           ))}
-          <Link
-            href="/auth"
-            onClick={() => setOpen(false)}
-            className="block w-full mt-2 px-4 py-3 border border-white/20 rounded-xl text-sm text-white/70 hover:text-white hover:border-white/50 transition-all text-center"
-          >
-            Sign In to Portal
-          </Link>
+
+          <div className="h-px bg-white/5 my-2" />
+
+          {user ? (
+            <>
+              <Link
+                href={getPortalLink()}
+                onClick={() => setOpen(false)}
+                className="block w-full px-4 py-3 bg-[#c8921e]/10 border border-[#c8921e]/20 rounded-xl text-sm font-semibold text-[#e8b84b] text-center"
+              >
+                My Portal — {user.name?.split(' ')[0]}
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="block w-full px-4 py-3 bg-red-500/5 border border-red-500/10 rounded-xl text-sm font-semibold text-red-400 text-center hover:bg-red-500/10 transition-all"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <div className="flex gap-2 mt-1">
+              <Link href="/auth" onClick={() => setOpen(false)} className="flex-1 px-4 py-3 border border-white/20 rounded-xl text-sm text-white/70 text-center hover:text-white transition-all">
+                Sign In
+              </Link>
+              <Link href="/auth" onClick={() => setOpen(false)} className="flex-1 px-4 py-3 bg-[#c8921e] rounded-xl text-sm font-bold text-[#0b1f3a] text-center hover:bg-[#e8b84b] transition-all">
+                Get Started
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </nav>
