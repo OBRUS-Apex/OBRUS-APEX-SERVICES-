@@ -1,11 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Cormorant_Garamond, Jost } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
 
-const inter = Inter({ subsets: ["latin"] });
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-serif",
+  display: "swap",
+});
+
+const jost = Jost({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "OBRUS APEX SERVICES | Integrated Corporate Solutions",
@@ -19,41 +29,32 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} antialiased bg-white text-slate-900`}>
-        {/* Toast Configuration */}
-        <Toaster 
+      <body className={`${cormorant.variable} ${jost.variable} font-sans antialiased bg-[#f5f0e8] text-[#0b1f3a]`}>
+        <Toaster
           position="top-right"
           toastOptions={{
             duration: 5000,
             style: {
-              background: '#0b1f3a', 
+              background: '#0b1f3a',
               color: '#ffffff',
-              border: '1px solid rgba(200, 146, 30, 0.3)', 
+              border: '1px solid rgba(200, 146, 30, 0.3)',
               fontSize: '14px',
+              fontFamily: 'Jost, sans-serif',
               borderRadius: '12px',
               padding: '12px 20px',
             },
             success: {
-              iconTheme: {
-                primary: '#c8921e', 
-                secondary: '#0b1f3a',
-              },
+              iconTheme: { primary: '#c8921e', secondary: '#0b1f3a' },
             },
             error: {
-              iconTheme: {
-                primary: '#ef4444',
-                secondary: '#fff',
-              },
+              iconTheme: { primary: '#ef4444', secondary: '#fff' },
             },
           }}
         />
-        
-        <Navbar />
         <main className="min-h-screen">
           {children}
         </main>
-        <Footer />
       </body>
     </html>
   );
-}
+  }
