@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import Link from 'next/link';
+import PublicNav from '@/components/PublicNav';
 import { useRouter } from 'next/navigation';
 
 export default function HsePage() {
@@ -11,24 +12,7 @@ export default function HsePage() {
     <div className="min-h-screen bg-[#f5f0e8] font-sans">
 
       {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(6,10,20,0.96)] backdrop-blur border-b border-[rgba(200,146,30,0.16)]">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#c8921e] rounded flex items-center justify-center font-black text-[#0b1f3a] text-lg italic">O</div>
-            <div>
-              <span className="block text-white font-bold text-sm leading-none">OBRUS</span>
-              <span className="text-[#e8b84b] text-[9px] uppercase tracking-widest">Apex Services</span>
-            </div>
-          </Link>
-          <div className="hidden md:flex items-center gap-1">
-            {[['/', 'Home'], ['/recruitment', 'Recruitment'], ['/environmental', 'Environmental'], ['/equipment', 'Equipment'], ['/hse', 'HSE']].map(([href, label]) => (
-              <Link key={href} href={href} className={`px-3 py-1.5 rounded text-sm transition-all ${href === '/hse' ? 'bg-[rgba(200,146,30,0.15)] text-[#e8b84b]' : 'text-white/60 hover:text-[#e8b84b] hover:bg-[rgba(200,146,30,0.1)]'}`}>{label}</Link>
-            ))}
-            <Link href="/auth" className="ml-2 px-4 py-1.5 border border-white/20 rounded text-sm text-white/70 hover:text-white transition-all">Login</Link>
-          </div>
-        </div>
-      </nav>
-
+      <PublicNav active="/environmental" />
       {/* HERO */}
       <section className="pt-36 pb-20 px-6 bg-gradient-to-br from-[#060f1e] via-[#0b1a0c] to-[#1a1000] relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[radial-gradient(circle,rgba(200,146,30,0.12),transparent_68%)] pointer-events-none" />
