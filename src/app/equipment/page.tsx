@@ -9,7 +9,7 @@ export default function EquipmentPage() {
   const [activeTab, setActiveTab] = useState('ppe');
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8] font-sans">
+    <div className="min-h-screen bg-[#f5f0e8] font-sans overflow-x-hidden">
 
       {/* NAV */}
       <PublicNav active="/equipment" />
