@@ -20,8 +20,9 @@ export default function ClientPortal() {
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
+  // FIX: priority default matches model enum
   const [requestForm, setRequestForm] = useState({
-    location: '', priority: 'Normal', targetDate: '', details: ''
+    location: '', priority: 'Normal Ops', targetDate: '', details: ''
   });
 
   useEffect(() => {
@@ -32,14 +33,17 @@ export default function ClientPortal() {
     fetchData(parsedUser._id);
   }, [router]);
 
+  // FIX: check res.ok before parsing JSON to avoid silent crashes
   const fetchData = async (userId: string) => {
     try {
       const [reqRes, invRes] = await Promise.all([
         fetch(`/api/client/requests?userId=${userId}`),
         fetch(`/api/client/invoices?userId=${userId}`)
       ]);
-      setRequests(await reqRes.json());
-      setInvoices(await invRes.json());
+      const reqData = reqRes.ok ? await reqRes.json() : [];
+      const invData = invRes.ok ? await invRes.json() : [];
+      setRequests(Array.isArray(reqData) ? reqData : []);
+      setInvoices(Array.isArray(invData) ? invData : []);
     } catch {
       toast.error('Failed to load your data. Please refresh.');
     } finally {
@@ -62,7 +66,8 @@ export default function ClientPortal() {
         fetchData(user._id);
         setActiveTab('activity');
       } else {
-        toast.error('Failed to submit request', { id: load });
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.message || 'Failed to submit request', { id: load });
       }
     } catch {
       toast.error('Network error. Please try again.', { id: load });
@@ -96,8 +101,9 @@ export default function ClientPortal() {
 
   const handleLogout = () => { localStorage.clear(); router.push('/auth'); };
 
+  // FIX: model uses 'unpaid' not 'pending'
   const totalUnpaid = Array.isArray(invoices)
-    ? invoices.filter(i => i.status === 'pending').reduce((acc, curr) => acc + curr.amount, 0)
+    ? invoices.filter(i => i.status === 'unpaid').reduce((acc, curr) => acc + curr.amount, 0)
     : 0;
 
   const switchTab = (tab: string) => {
@@ -204,14 +210,21 @@ export default function ClientPortal() {
                 </div>
               </div>
 
-              {/* Recent requests preview */}
-              {requests.length > 0 && (
-                <div className="bg-white rounded-2xl border border-[rgba(11,31,58,0.06)] overflow-hidden">
-                  <div className="p-5 border-b border-[rgba(11,31,58,0.05)] flex items-center justify-between">
-                    <h3 className="font-semibold text-[#0b1f3a]">Recent Requests</h3>
-                    <button onClick={() => switchTab('activity')} className="text-xs font-semibold text-[#c8921e] hover:underline">View all →</button>
+              {/* Recent requests — always shown with proper empty state */}
+              <div className="bg-white rounded-2xl border border-[rgba(11,31,58,0.06)] overflow-hidden">
+                <div className="p-5 border-b border-[rgba(11,31,58,0.05)] flex items-center justify-between">
+                  <h3 className="font-semibold text-[#0b1f3a]">Recent Requests</h3>
+                  <button onClick={() => switchTab('activity')} className="text-xs font-semibold text-[#c8921e] hover:underline">View all →</button>
+                </div>
+                {requests.length === 0 ? (
+                  <div className="p-10 text-center">
+                    <p className="text-slate-400 text-sm mb-4">No service requests yet.</p>
+                    <button onClick={() => switchTab('engage')} className="px-6 py-2.5 bg-[#c8921e] text-[#0b1f3a] rounded-xl text-sm font-bold hover:bg-[#e8b84b] transition-all">
+                      Book Your First Service
+                    </button>
                   </div>
-                  {requests.slice(0, 3).map((r: any) => (
+                ) : (
+                  requests.slice(0, 3).map((r: any) => (
                     <div key={r._id} className="flex items-center justify-between p-4 border-b border-[rgba(11,31,58,0.04)] last:border-0 hover:bg-[#f9f8f6] transition-all">
                       <div>
                         <p className="font-semibold text-sm text-[#0b1f3a]">{r.serviceType}</p>
@@ -219,9 +232,9 @@ export default function ClientPortal() {
                       </div>
                       <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${r.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-[#c8921e]/10 text-[#c8921e]'}`}>{r.status}</span>
                     </div>
-                  ))}
-                </div>
-              )}
+                  ))
+                )}
+              </div>
             </motion.div>
           )}
 
@@ -276,16 +289,23 @@ export default function ClientPortal() {
                     ) : (
                       invoices.map((inv: any) => (
                         <tr key={inv._id} className="hover:bg-[#f9f8f6] transition-all">
-                          <td className="p-4 md:p-6 font-mono text-sm font-bold text-[#0b1f3a]">{inv.id || 'INV-001'}</td>
-                          <td className="p-4 md:p-6 font-serif font-bold text-[#0b1f3a] italic">{inv.service}</td>
-                          <td className="p-4 md:p-6 font-bold text-[#0b1f3a]">₦{inv.amount.toLocaleString()}</td>
+                          {/* FIX: model uses invoiceNumber not id */}
+                          <td className="p-4 md:p-6 font-mono text-sm font-bold text-[#0b1f3a]">{inv.invoiceNumber || 'INV-001'}</td>
+                          {/* FIX: model uses serviceType not service */}
+                          <td className="p-4 md:p-6 font-serif font-bold text-[#0b1f3a] italic">{inv.serviceType}</td>
+                          <td className="p-4 md:p-6 font-bold text-[#0b1f3a]">₦{inv.amount?.toLocaleString()}</td>
                           <td className="p-4 md:p-6">
-                            {inv.status === 'pending' ? (
+                            {/* FIX: model status is 'unpaid' not 'pending' */}
+                            {inv.status === 'unpaid' ? (
                               <button onClick={() => setSelectedInvoice(inv)} className="bg-[#0b1f3a] text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#c8921e] transition-all active:scale-95">
                                 Pay Now
                               </button>
                             ) : (
-                              <span className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${inv.status === 'paid' ? 'bg-green-50 text-green-600' : 'bg-[#c8921e]/10 text-[#c8921e]'}`}>
+                              <span className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${
+                                inv.status === 'paid' ? 'bg-green-50 text-green-600' :
+                                inv.status === 'verifying' ? 'bg-blue-50 text-blue-500' :
+                                'bg-[#c8921e]/10 text-[#c8921e]'
+                              }`}>
                                 {inv.status}
                               </span>
                             )}
@@ -374,10 +394,11 @@ export default function ClientPortal() {
                   </div>
                   <div>
                     <label className="field-label">Priority Level</label>
+                    {/* FIX: option values match model enum exactly */}
                     <select className="field-input" onChange={e => setRequestForm({...requestForm, priority: e.target.value})}>
-                      <option>Normal</option>
-                      <option>High Priority</option>
-                      <option>Urgent</option>
+                      <option value="Normal Ops">Normal</option>
+                      <option value="High Priority">High Priority</option>
+                      <option value="Urgent Dispatch">Urgent</option>
                     </select>
                   </div>
                 </div>
@@ -413,7 +434,6 @@ export default function ClientPortal() {
               exit={{ y: 50, opacity: 0 }}
               className="bg-white w-full sm:max-w-4xl rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden max-h-[92vh]"
             >
-              {/* Invoice detail */}
               <div id="invoice-printable" className="flex-1 p-7 md:p-14 overflow-y-auto">
                 <div className="flex justify-between items-start mb-10">
                   <div className="flex items-center gap-3">
@@ -425,7 +445,7 @@ export default function ClientPortal() {
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Invoice</p>
-                    <span className="text-xl font-mono font-bold text-[#0b1f3a]">{selectedInvoice.id || 'INV-001'}</span>
+                    <span className="text-xl font-mono font-bold text-[#0b1f3a]">{selectedInvoice.invoiceNumber || 'INV-001'}</span>
                   </div>
                 </div>
 
@@ -445,7 +465,7 @@ export default function ClientPortal() {
                 <div className="border-y-2 border-[#0b1f3a] py-8 mb-10 flex justify-between items-end">
                   <div>
                     <p className="text-[#c8921e] font-bold text-[10px] uppercase tracking-widest mb-2">Service</p>
-                    <h5 className="font-serif text-2xl font-bold italic text-[#0b1f3a]">{selectedInvoice.service}</h5>
+                    <h5 className="font-serif text-2xl font-bold italic text-[#0b1f3a]">{selectedInvoice.serviceType}</h5>
                   </div>
                   <h5 className="text-3xl font-bold text-[#0b1f3a]">₦{selectedInvoice.amount?.toLocaleString()}</h5>
                 </div>
@@ -456,7 +476,6 @@ export default function ClientPortal() {
                 </div>
               </div>
 
-              {/* Payment panel */}
               <div className="w-full md:w-[340px] bg-[#f0ede6] p-7 md:p-12 flex flex-col border-t md:border-t-0 md:border-l border-[rgba(11,31,58,0.05)]">
                 <button onClick={() => setSelectedInvoice(null)} className="ml-auto mb-8 bg-white p-2.5 rounded-full shadow text-[#0b1f3a] hover:rotate-90 transition-all duration-500">
                   <X size={18}/>
@@ -493,7 +512,7 @@ export default function ClientPortal() {
 
       <style jsx>{`
         @media print {
-          aside, header, .no-print { display: none !important; }
+          aside, header { display: none !important; }
           main { margin-left: 0 !important; }
           #invoice-printable { position: fixed; inset: 0; background: white; padding: 40px; z-index: 9999; }
         }
@@ -513,7 +532,7 @@ function SidebarLink({ label, ico, active, onClick }: any) {
       onClick={onClick}
       className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all font-bold text-xs uppercase tracking-widest ${active ? 'bg-[#c8921e]/15 text-[#e8b84b] border-l-4 border-[#c8921e]' : 'text-white/25 hover:text-white hover:bg-white/5 border-l-4 border-transparent'}`}
     >
-      <span className={active ? 'text-[#c8921e]' : 'opacity-30 group-hover:opacity-60'}>{ico}</span>
+      <span className={active ? 'text-[#c8921e]' : 'opacity-30'}>{ico}</span>
       <span>{label}</span>
     </button>
   );
