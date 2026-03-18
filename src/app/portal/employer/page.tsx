@@ -312,9 +312,9 @@ export default function EmployerPortal() {
                           <h4 className="font-serif text-xl font-bold text-[#0b1f3a] italic mb-2">{job.title}</h4>
                           <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-400">
                             <span className="flex items-center gap-1.5"><MapPin size={12} className="text-[#c8921e]"/> {job.location}</span>
-                            {job.salaryRange?.min > 0 && (
-                              <span className="flex items-center gap-1.5"><DollarSign size={12} className="text-[#c8921e]"/> ₦{job.salaryRange.min.toLocaleString()} – ₦{job.salaryRange.max.toLocaleString()}</span>
-                            )}
+                            {job.salary && job.salary !== 'Negotiable' && (
+  <span className="flex items-center gap-1.5"><DollarSign size={12} className="text-[#c8921e]"/> {job.salary}</span>
+)}
                             <span className="flex items-center gap-1.5"><Clock size={12}/> {new Date(job.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
                           </div>
                         </div>
