@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       ]);
 
     if (dbError) {
-      return NextResponse.json({ message: "Failed to create user profile. Please try again." }, { status: 500 });
+      return NextResponse.json({ message: `DB Error: ${dbError.message}` }, { status: 500 });
     }
 
     return NextResponse.json({ 
