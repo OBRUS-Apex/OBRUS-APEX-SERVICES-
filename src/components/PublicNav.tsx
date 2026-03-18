@@ -43,13 +43,11 @@ export default function PublicNav({ active }: { active: string }) {
     >
       {/* Top bar */}
       <div className="px-5 h-16 flex items-center justify-between max-w-7xl mx-auto">
-        <Link href="/" className="flex items-center gap-3 shrink-0 min-w-0">
-          <div className="w-8 h-8 bg-[#c8921e] rounded-lg flex items-center justify-center font-black text-[#0b1f3a] text-base italic shrink-0">O</div>
-          <div className="min-w-0">
-            <span className="block text-white font-bold text-sm leading-none">OBRUS</span>
-            <span className="text-[#e8b84b] text-[9px] uppercase tracking-widest">Apex Services</span>
-          </div>
-        </Link>
+        <Link href="/" className="shrink-0">
+  <div className="bg-white rounded-xl px-2 py-1.5">
+    <img src="/logo.png" alt="OBRUS Apex Services" className="h-8 w-auto" />
+  </div>
+</Link>
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-1">
