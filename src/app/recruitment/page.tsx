@@ -179,9 +179,9 @@ export default function RecruitmentPage() {
             <button onClick={() => setTab('seeker')} className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all ${tab === 'seeker' ? 'bg-[#c8921e] text-[#0b1f3a]' : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'}`}>
               👤 Job Seekers
             </button>
-            <button onClick={() => setTab('employer')} className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all ${tab === 'employer' ? 'bg-[#c8921e] text-[#0b1f3a]' : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'}`}>
+            <a href="https://obrus-apex-servicess.pxxl.click/portal/employer" className="flex items-center px-6 py-3 rounded-2xl font-bold text-sm transition-all bg-white/10 text-white/60 hover:bg-white/20 hover:text-white">
               🏢 Employers
-            </button>
+            </a>
           </div>
         </div>
       </section>
@@ -471,7 +471,7 @@ export default function RecruitmentPage() {
       )}
 
       <footer className="bg-[#060f1e] py-8 px-6 text-center text-white/40 text-sm mt-10">
-        <p>© 2025 OBRUS APEX SERVICES · <Link href="/" className="text-[#e8b84b]">Home</Link> · <Link href="/hse" className="text-[#e8b84b]">HSE</Link> · <Link href="/environmental" className="text-[#e8b84b]">Environmental</Link> · <Link href="/equipment" className="text-[#e8b84b]">Equipment</Link></p>
+        <p>© 2026 OBRUS APEX SERVICES · <Link href="/" className="text-[#e8b84b]">Home</Link> · <Link href="/hse" className="text-[#e8b84b]">HSE</Link> · <Link href="/environmental" className="text-[#e8b84b]">Environmental</Link> · <Link href="/equipment" className="text-[#e8b84b]">Equipment</Link></p>
       </footer>
 
       <style jsx>{`
