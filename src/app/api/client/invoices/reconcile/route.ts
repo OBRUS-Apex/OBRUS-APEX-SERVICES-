@@ -1,24 +1,27 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import Invoice from '@/models/Invoice';
+import { supabase } from '@/lib/supabase';
 
 export async function PATCH(req: Request) {
   try {
-    await dbConnect();
     const { invoiceId, receiptUrl } = await req.json();
 
-    const invoice = await Invoice.findByIdAndUpdate(
-      invoiceId,
-      { status: 'verifying', receiptUrl },
-      { new: true }
-    );
+    if (!invoiceId || !receiptUrl) {
+      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
+    }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "Transaction logged for Admin verification.",
-      invoice 
-    });
-  } catch (error) {
-    return NextResponse.json({ message: "Payment reconciliation failed" }, { status: 500 });
+    const { data, error } = await supabase
+      .from('invoices')
+      .update({ 
+        receipt_url: receiptUrl,
+        status: 'verifying' 
+      })
+      .eq('id', invoiceId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return NextResponse.json({ success: true, invoice: data }, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
