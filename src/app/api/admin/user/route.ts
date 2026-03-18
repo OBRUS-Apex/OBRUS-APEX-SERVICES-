@@ -1,40 +1,29 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import User from '@/models/User';
-import { sendStaffWelcomeEmail } from '@/lib/mail';
+import { supabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
-    await dbConnect();
-    const users = await User.find({}).sort({ createdAt: -1 });
-    return NextResponse.json(users);
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
-  }
-}
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-export async function PATCH(req: Request) {
-  try {
-    await dbConnect();
-    const { userId, newRole } = await req.json();
+    if (error) throw error;
 
-    const user = await User.findById(userId);
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
+    // Map Postgres snake_case back to the camelCase your frontend expects
+    const formattedUsers = data.map((u: any) => ({
+      _id: u.id,
+      name: u.name,
+      email: u.email,
+      phone: u.phone,
+      userType: u.user_type,
+      role: u.role,
+      status: u.status,
+      employerProfile: u.employer_profile,
+      createdAt: u.created_at
+    }));
 
-    user.role = newRole;
-    await user.save();
-
-    if (newRole === 'staff') {
-      try {
-        await sendStaffWelcomeEmail(user.email, user.name);
-      } catch (mailError) {
-        console.error("Email failed but role was updated");
-      }
-    }
-
-    return NextResponse.json({ success: true, user });
+    return NextResponse.json(formattedUsers, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
