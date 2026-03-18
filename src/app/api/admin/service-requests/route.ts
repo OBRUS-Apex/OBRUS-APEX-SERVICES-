@@ -1,14 +1,29 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import ServiceRequest from '@/models/ServiceRequest';
+import { supabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
-    await dbConnect();
-    const requests = await ServiceRequest.find({})
-      .populate('userId', 'name email phone')
-      .sort({ createdAt: -1 });
-    return NextResponse.json(requests);
+    // Supabase join syntax for the user info
+    const { data, error } = await supabase
+      .from('service_requests')
+      .select('*, userId:users!user_id(name, email, phone)')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const formatted = data.map(req => ({
+      _id: req.id,
+      userId: req.userId,
+      serviceType: req.service_type,
+      location: req.location,
+      priority: req.priority,
+      targetDate: req.target_date,
+      details: req.details,
+      status: req.status,
+      createdAt: req.created_at
+    }));
+
+    return NextResponse.json(formatted);
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
@@ -16,11 +31,11 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
   try {
-    await dbConnect();
     const { id, status } = await req.json();
-    const updated = await ServiceRequest.findByIdAndUpdate(id, { status }, { new: true });
-    return NextResponse.json({ success: true, request: updated });
+    const { data, error } = await supabase.from('service_requests').update({ status }).eq('id', id).select().single();
+    if (error) throw error;
+    return NextResponse.json({ success: true, request: data });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
-}
+                             }
