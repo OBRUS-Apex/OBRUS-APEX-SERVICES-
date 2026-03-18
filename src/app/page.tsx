@@ -4,8 +4,9 @@ import Link from 'next/link';
 import { 
   ArrowRight, ShieldCheck, Zap, Menu, X, Phone, Mail, 
   Briefcase, BarChart, Settings, CheckCircle, User, LogOut,
-  Target, ClipboardCheck, Scale, MapPin
+  Target, ClipboardCheck, Scale, MapPin, Award, Check
 } from 'lucide-react';
+
 const NAV_LINKS = [
   { href: '/recruitment', label: 'Recruitment' },
   { href: '/environmental', label: 'Environmental' },
@@ -16,40 +17,28 @@ const NAV_LINKS = [
 const SERVICES = [
   { 
     t: 'Recruitment & Manpower', 
-    problem: 'High turnover and unqualified technical staff.',
-    solution: 'We deploy rigorously vetted professionals across industrial sectors, ensuring operational continuity without the hiring overhead.', 
-    i: '👥', border: 'border-[#c8921e]', href: '/recruitment' 
+    headline: 'Qualified Professionals, Ready to Drive Your Success.',
+    desc: 'Our recruitment team sources, vets, and deploys highly skilled professionals tailored to your operational needs. We ensure that your workforce is competent, reliable, and aligned with your business goals, so you can focus on growth without worrying about staffing challenges.', 
+    i: '👥', border: 'border-[#c8921e]', href: '/recruitment', cta: 'Request Staffing Solutions'
   },
   { 
-    t: 'Environmental Services', 
-    problem: 'Regulatory non-compliance and facility health risks.',
-    solution: 'Certified fumigation, waste management, and sanitation services that keep your facilities 100% compliant with NESREA standards.', 
-    i: '🌿', border: 'border-[#1a7a4a]', href: '/environmental' 
+    t: 'Facility & Operations Management', 
+    headline: 'Keeping Your Facilities Safe, Efficient, and Compliant.',
+    desc: 'We provide comprehensive facility management services, ensuring your business premises are well-maintained, operationally efficient, and fully compliant with industry standards. From routine maintenance to project oversight, we keep your operations running seamlessly.', 
+    i: '🏗️', border: 'border-[#1a7a4a]', href: '/environmental', cta: 'Learn More About Facility Management'
   },
   { 
-    t: 'Equipment Procurement', 
-    problem: 'Supply chain delays and substandard safety gear.',
-    solution: 'Direct sourcing and supply of certified PPE and facility materials from verified global manufacturers to your site.', 
-    i: '⚙️', border: 'border-[#0b1f3a]', href: '/equipment' 
+    t: 'HSE & Safety Consultancy', 
+    headline: 'Safety and Compliance You Can Trust.',
+    desc: 'Our HSE experts offer practical, industry-aligned safety solutions that protect your staff, assets, and operations. We conduct risk assessments, develop safety protocols, and ensure your business complies with all health, safety, and environmental regulations.', 
+    i: '🛡️', border: 'border-[#c8921e]', href: '/hse', cta: 'Schedule a Safety Consultation'
   },
   { 
-    t: 'HSE Consultancy', 
-    problem: 'Workplace accidents and lack of safety frameworks.',
-    solution: 'Comprehensive risk assessments, safety audits, and NEBOSH-accredited training to build a zero-incident workplace culture.', 
-    i: '🛡️', border: 'border-[#c8921e]', href: '/hse' 
-  },
-  { 
-    t: 'Facility Maintenance', 
-    problem: 'Unexpected downtime and facility degradation.',
-    solution: 'Preventative and reactive maintenance protocols to keep your buildings and equipment operating at peak efficiency.', 
-    i: '🏗️', border: 'border-[#1a7a4a]', href: '/environmental' 
-  },
-  { 
-    t: 'Corporate Consulting', 
-    problem: 'Operational friction and inefficient processes.',
-    solution: 'Strategic advisory services designed to streamline your operations, improve safety metrics, and scale your workforce effectively.', 
-    i: '💡', border: 'border-[#0b1f3a]', href: '/hse' 
-  },
+    t: 'Equipment & Supplies Procurement', 
+    headline: 'Reliable Equipment, Delivered On Time.',
+    desc: 'We streamline procurement of quality equipment and materials for your projects. With a focus on cost-efficiency, quality, and timely delivery, we ensure your operations have the tools needed for success.', 
+    i: '⚙️', border: 'border-[#0b1f3a]', href: '/equipment', cta: 'Request Procurement Assistance'
+  }
 ];
 
 export default function HomePage() {
@@ -103,7 +92,7 @@ export default function HomePage() {
             ) : (
               <div className="flex items-center gap-2">
                 <Link href="/auth" className="px-5 py-2 border border-white/20 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:border-white/50 transition-all">Client Login</Link>
-                <Link href="/contact" className="px-5 py-2 bg-[#c8921e] rounded-lg text-sm font-bold text-[#0b1f3a] hover:bg-[#e8b84b] transition-all">Consult an Expert</Link>
+                <Link href="/contact" className="px-5 py-2 bg-[#c8921e] rounded-lg text-sm font-bold text-[#0b1f3a] hover:bg-[#e8b84b] transition-all">Contact Us Today</Link>
               </div>
             )}
           </div>
@@ -129,14 +118,14 @@ export default function HomePage() {
             ) : (
               <div className="flex gap-2 mt-1">
                 <Link href="/auth" onClick={() => setNavOpen(false)} className="flex-1 px-4 py-3 border border-white/20 rounded-xl text-sm font-medium text-white/80 text-center hover:text-white transition-all">Client Login</Link>
-                <Link href="/contact" onClick={() => setNavOpen(false)} className="flex-1 px-4 py-3 bg-[#c8921e] rounded-xl text-sm font-bold text-[#0b1f3a] text-center hover:bg-[#e8b84b] transition-all">Consult Us</Link>
+                <Link href="/contact" onClick={() => setNavOpen(false)} className="flex-1 px-4 py-3 bg-[#c8921e] rounded-xl text-sm font-bold text-[#0b1f3a] text-center hover:bg-[#e8b84b] transition-all">Contact Us</Link>
               </div>
             )}
           </div>
         )}
       </nav>
 
-      {/* 1. POSITIONING HERO (Above the fold clarity) */}
+      {/* 1. POSITIONING HERO (Client Copy) */}
       <section className="min-h-[90vh] flex items-center px-5 pt-32 pb-20 bg-[#060f1e] relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#c8921e]/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#1a7a4a]/5 rounded-full blur-[100px] pointer-events-none" />
@@ -144,147 +133,77 @@ export default function HomePage() {
         <div className="relative z-10 max-w-6xl mx-auto w-full">
           <div className="inline-flex items-center gap-2 border border-[#c8921e]/30 bg-[#c8921e]/10 px-4 py-1.5 rounded-full mb-6">
             <ShieldCheck size={14} className="text-[#e8b84b]" />
-            <span className="text-[#e8b84b] text-[10px] font-bold uppercase tracking-widest">ISO & NEBOSH Compliant Partner</span>
+            <span className="text-[#e8b84b] text-[10px] font-bold uppercase tracking-widest">Obrus Apex Services</span>
           </div>
 
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl text-white font-bold leading-[1.1] mb-6 max-w-4xl">
-            Enterprise-Grade <span className="text-[#c8921e] italic font-medium">Operations, Safety & Manpower.</span>
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white font-bold leading-[1.1] mb-6 max-w-4xl">
+            Your Partner in <span className="text-[#c8921e] italic font-medium">Excellence, Safety, and Operational Efficiency.</span>
           </h1>
           
-          <p className="text-white/60 text-base md:text-xl leading-relaxed mb-10 max-w-2xl font-light">
-            We help industrial and corporate leaders across West Africa eliminate operational friction. From deploying rigorously vetted technical staff to managing complete HSE compliance and facility infrastructure.
+          <p className="text-white/80 text-lg md:text-xl font-medium mb-4 max-w-3xl">
+            Trusted solutions in facility management, HSE compliance, manpower deployment, and project support — tailored for your business success.
+          </p>
+
+          <p className="text-white/50 text-base md:text-lg leading-relaxed mb-10 max-w-3xl font-light">
+            At Obrus Apex Services, we combine expertise, innovation, and reliability to provide solutions that help your business thrive. From managing facilities to deploying qualified professionals, ensuring safety compliance, and procuring project equipment, we deliver services that make operations smoother, safer, and more efficient.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/contact" className="bg-[#c8921e] hover:bg-[#e8b84b] text-[#060f1e] px-8 py-4 rounded-xl font-bold text-sm transition-all shadow-xl text-center flex justify-center items-center gap-2">
-              Request Corporate Assessment <ArrowRight size={16}/>
+              Request a Consultation <ArrowRight size={16}/>
             </Link>
-            <Link href="/auth" className="border border-white/20 text-white hover:border-white hover:bg-white/5 px-8 py-4 rounded-xl font-bold text-sm transition-all text-center">
-              Access Client Portal
+            <Link href="#services" className="border border-white/20 text-white hover:border-white hover:bg-white/5 px-8 py-4 rounded-xl font-bold text-sm transition-all text-center">
+              View Our Services
             </Link>
-          </div>
-
-          {/* Early Authority Stacking */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 pt-12 border-t border-white/10">
-            {[
-              { n: '400+', l: 'Vetted Professionals Deployed' }, 
-              { n: '150+', l: 'Enterprise Clients Supported' }, 
-              { n: '48hr', l: 'Average Deployment Speed' }, 
-              { n: '100%', l: 'Zero-Incident Safety Record' }
-            ].map((stat) => (
-              <div key={stat.l} className="border-l-2 border-[#c8921e]/30 pl-4">
-                <div className="font-serif text-3xl md:text-4xl text-white font-bold mb-1">{stat.n}</div>
-                <div className="text-[10px] text-white/50 uppercase tracking-widest font-semibold leading-snug">{stat.l}</div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* 2. THE SYSTEM (Process Breakdown to build trust) */}
-      <section className="py-24 px-5 bg-white border-b border-[rgba(11,31,58,0.06)]">
+      {/* 2. SERVICES SECTION (Client Copy) */}
+      <section id="services" className="py-24 px-5 scroll-mt-20">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-[#c8921e] text-xs font-bold tracking-widest uppercase mb-3">Our Methodology</p>
-            <h2 className="font-serif text-3xl md:text-5xl font-bold text-[#0b1f3a] max-w-2xl mx-auto leading-tight">
-              A structured approach to solving complex operational challenges.
+          <div className="mb-14 text-center">
+            <p className="text-[#c8921e] text-xs font-bold tracking-widest uppercase mb-3">What We Do</p>
+            <h2 className="font-serif text-3xl md:text-5xl font-bold text-[#0b1f3a] leading-tight">
+              Our Core Services
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 relative">
-            {/* Connecting line for desktop */}
-            <div className="hidden md:block absolute top-12 left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-transparent via-[#c8921e]/30 to-transparent" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {SERVICES.map((svc) => (
+              <div key={svc.t} className={`bg-white p-8 md:p-10 rounded-3xl border-t-4 ${svc.border} border-x border-b border-[rgba(11,31,58,0.06)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col h-full`}>
+                <div className="text-4xl mb-6 bg-[#f9f8f6] w-16 h-16 flex items-center justify-center rounded-2xl group-hover:scale-110 transition-transform shrink-0">{svc.i}</div>
+                <h3 className="font-serif text-2xl font-bold text-[#0b1f3a] mb-2">{svc.t}</h3>
+                <h4 className="text-[#c8921e] text-sm font-bold mb-4">{svc.headline}</h4>
+                
+                <p className="text-slate-600 text-sm leading-relaxed mb-8 flex-1">
+                  {svc.desc}
+                </p>
 
-            {[
-              { 
-                step: '01', icon: <Target className="text-[#c8921e]" size={28}/>, 
-                title: 'Diagnosis & Audit', 
-                desc: 'We do not guess. We begin with a rigorous assessment of your facility, safety protocols, or manpower gaps to identify exactly where you are losing efficiency.'
-              },
-              { 
-                step: '02', icon: <Settings className="text-[#c8921e]" size={28}/>, 
-                title: 'Strategic Execution', 
-                desc: 'Whether deploying a team of certified engineers, procuring compliant PPE, or executing a deep-clean fumigation, we execute based on data, not assumptions.'
-              },
-              { 
-                step: '03', icon: <Scale className="text-[#c8921e]" size={28}/>, 
-                title: 'Management & Scale', 
-                desc: 'Through our secure client portal, you track invoices, request new services, and monitor compliance metrics in real-time. We manage the complexity so you can scale.'
-              }
-            ].map((phase, i) => (
-              <div key={i} className="relative bg-[#f9f8f6] rounded-3xl p-8 border border-[rgba(11,31,58,0.04)] hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-[rgba(11,31,58,0.06)] mb-6 mx-auto relative z-10">
-                  {phase.icon}
-                </div>
-                <div className="text-center">
-                  <span className="text-[#c8921e] text-[10px] font-black uppercase tracking-widest block mb-2">Phase {phase.step}</span>
-                  <h3 className="font-serif text-2xl font-bold text-[#0b1f3a] mb-3">{phase.title}</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">{phase.desc}</p>
-                </div>
+                <Link href={svc.href} className="inline-flex items-center gap-2 pt-5 border-t border-[rgba(11,31,58,0.06)] text-sm font-bold text-[#0b1f3a] group-hover:text-[#c8921e] transition-colors mt-auto">
+                  {svc.cta} <ArrowRight size={16}/>
+                </Link>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 3. SERVICE HIERARCHY (Problem -> Solution framing) */}
-      <section className="py-24 px-5">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-14 md:flex justify-between items-end">
-            <div className="max-w-2xl">
-              <p className="text-[#c8921e] text-xs font-bold tracking-widest uppercase mb-3">Core Divisions</p>
-              <h2 className="font-serif text-3xl md:text-5xl font-bold text-[#0b1f3a] leading-tight">
-                Integrated solutions for modern industries.
-              </h2>
-            </div>
-            <Link href="/contact" className="hidden md:inline-flex items-center gap-2 text-sm font-bold text-[#c8921e] hover:text-[#0b1f3a] transition-colors pb-2">
-              Discuss your specific needs <ArrowRight size={16}/>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SERVICES.map((svc) => (
-              <Link key={svc.t} href={svc.href} className={`bg-white p-8 rounded-3xl border-t-4 ${svc.border} border-x border-b border-[rgba(11,31,58,0.06)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group block`}>
-                <div className="text-4xl mb-6 bg-[#f9f8f6] w-16 h-16 flex items-center justify-center rounded-2xl group-hover:scale-110 transition-transform">{svc.i}</div>
-                <h3 className="font-serif text-2xl font-bold text-[#0b1f3a] mb-4">{svc.t}</h3>
-                
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">The Problem</span>
-                    <p className="text-[#0b1f3a] text-sm font-medium leading-snug">{svc.problem}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#1a7a4a] block mb-1">Our Solution</span>
-                    <p className="text-slate-600 text-sm leading-relaxed">{svc.solution}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 pt-4 border-t border-[rgba(11,31,58,0.06)] text-xs font-bold text-[#c8921e] group-hover:text-[#0b1f3a] transition-colors">
-                  Explore Division <ArrowRight size={14}/>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. TRUST & AUTHORITY LAYER */}
+      {/* 3. ABOUT / WHY CHOOSE US (Client Copy) */}
       <section className="bg-[#060f1e] py-24 px-5 border-y border-white/10">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <div>
-            <p className="text-[#c8921e] text-xs font-bold tracking-widest uppercase mb-4">Why Industry Leaders Trust OBRUS</p>
-            <h2 className="font-serif text-3xl md:text-5xl text-white font-bold leading-tight mb-6">
-              We mitigate risk so you can focus on growth.
+            <p className="text-[#c8921e] text-xs font-bold tracking-widest uppercase mb-4">Why Choose Us</p>
+            <h2 className="font-serif text-3xl md:text-5xl text-white font-bold leading-tight mb-10">
+              Expertise. Reliability. Operational Excellence.
             </h2>
-            <p className="text-white/60 text-base leading-relaxed mb-10">
-              Partnering with OBRUS means passing the burden of compliance, sourcing, and workforce management to a dedicated, certified team. We operate with strict adherence to national safety and corporate standards.
-            </p>
             
             <div className="space-y-6">
               {[
-                { i: <ClipboardCheck className="text-[#c8921e]" size={24}/>, t: 'Strict Regulatory Compliance', d: 'All services align with NESREA, DPR, and OSHA regulatory frameworks.' },
-                { i: <User className="text-[#c8921e]" size={24}/>, t: 'Pre-Vetted Professional Network', d: 'Every candidate and contractor undergoes rigorous background and technical skill assessments.' },
-                { i: <BarChart className="text-[#c8921e]" size={24}/>, t: 'Transparent Client Portal', d: 'Manage requests, track invoices, and review candidate profiles through your secure dashboard.' },
+                { i: <Award className="text-[#c8921e]" size={24}/>, t: 'Proven Track Record', d: 'Years of experience delivering results across multiple industries.' },
+                { i: <Settings className="text-[#c8921e]" size={24}/>, t: 'Tailored Solutions', d: 'Services customized specifically for your unique operational needs.' },
+                { i: <Zap className="text-[#c8921e]" size={24}/>, t: 'Efficiency & Reliability', d: 'Timely execution of projects without ever compromising on quality.' },
+                { i: <ShieldCheck className="text-[#c8921e]" size={24}/>, t: 'Safety & Compliance', d: 'Every solution is meticulously designed to meet strict regulatory standards.' },
               ].map((pt) => (
                 <div key={pt.t} className="flex gap-5">
                   <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 border border-white/10">{pt.i}</div>
@@ -297,29 +216,33 @@ export default function HomePage() {
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-[#0b1f3a] to-[#060f1e] rounded-[40px] p-10 md:p-14 border border-[#c8921e]/20 shadow-2xl relative">
-            <div className="absolute top-10 right-10 opacity-10">
-              <ShieldCheck size={120} className="text-[#c8921e]" />
+          <div className="bg-[#0b1f3a] rounded-[40px] p-10 md:p-14 border border-[#c8921e]/20 shadow-2xl relative overflow-hidden">
+             <div className="absolute -bottom-10 -right-10 opacity-5">
+              <ShieldCheck size={250} className="text-[#c8921e]" />
             </div>
-            <h3 className="font-serif text-white text-3xl font-bold mb-6 relative z-10">Ready to streamline your operations?</h3>
-            <p className="text-white/60 leading-relaxed mb-10 relative z-10">
-              Whether you need to staff an upcoming project, secure facility compliance, or procure safety equipment, our team is ready to deploy.
-            </p>
             
-            <div className="space-y-4 relative z-10">
-              <Link href="/contact" className="w-full flex justify-center items-center gap-2 py-4 bg-[#c8921e] text-[#0b1f3a] rounded-xl font-bold text-sm hover:bg-[#e8b84b] transition-all">
-                Book a Strategy Call →
-              </Link>
-              <Link href="/auth" className="w-full flex justify-center items-center gap-2 py-4 bg-white/5 text-white border border-white/10 rounded-xl font-bold text-sm hover:bg-white/10 transition-all">
-                Create Employer Account
-              </Link>
+            <div className="relative z-10">
+              <p className="text-[#c8921e] text-xs font-bold tracking-widest uppercase mb-4">Take Action</p>
+              <h3 className="font-serif text-white text-3xl md:text-4xl font-bold mb-6">Let’s Elevate Your Business Together.</h3>
+              <p className="text-white/60 leading-relaxed mb-10">
+                Ready to streamline operations, ensure safety compliance, or deploy skilled manpower? Contact us today to speak with our experts or request a personalized consultation.
+              </p>
+              
+              <div className="space-y-4">
+                <Link href="/contact" className="w-full flex justify-center items-center gap-2 py-4 bg-[#c8921e] text-[#0b1f3a] rounded-xl font-bold text-sm hover:bg-[#e8b84b] transition-all">
+                  Request a Consultation →
+                </Link>
+                <Link href="/contact" className="w-full flex justify-center items-center gap-2 py-4 bg-white/5 text-white border border-white/10 rounded-xl font-bold text-sm hover:bg-white/10 transition-all">
+                  Contact Us
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-[#060f1e] py-16 px-5 border-t border-white/5">
+      <footer className="bg-[#060f1e] py-16 px-5">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
             <div className="lg:col-span-1">
@@ -331,14 +254,14 @@ export default function HomePage() {
                 </div>
               </div>
               <p className="text-white/40 text-sm leading-relaxed">
-                Integrated enterprise solutions for recruitment, HSE, and facility management across West Africa.
+                Expert facility management, HSE compliance, manpower deployment, and equipment procurement solutions.
               </p>
             </div>
             
             <div>
               <p className="text-white/80 text-xs font-bold uppercase tracking-widest mb-6">Divisions</p>
               <div className="space-y-3">
-                {[['Manpower Recruitment', '/recruitment'], ['Environmental Services', '/environmental'], ['Equipment Procurement', '/equipment'], ['HSE Consultancy', '/hse']].map(([label, href]) => (
+                {[['Manpower Recruitment', '/recruitment'], ['Facility Management', '/environmental'], ['Equipment Procurement', '/equipment'], ['HSE Consultancy', '/hse']].map(([label, href]) => (
                   <Link key={href} href={href} className="block text-white/40 text-sm hover:text-[#c8921e] transition-all">{label}</Link>
                 ))}
               </div>
@@ -369,7 +292,7 @@ export default function HomePage() {
           </div>
           
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-white/30 text-xs">© {new Date().getFullYear()} OBRUS Apex Integrated Services Ltd. RC: 7249112.</p>
+            <p className="text-white/30 text-xs">© {new Date().getFullYear()} Obrus Apex Services. All Rights Reserved.</p>
             <div className="flex gap-6">
               <Link href="#" className="text-white/30 text-xs hover:text-[#c8921e] transition-colors">Privacy Policy</Link>
               <Link href="#" className="text-white/30 text-xs hover:text-[#c8921e] transition-colors">Terms of Service</Link>
