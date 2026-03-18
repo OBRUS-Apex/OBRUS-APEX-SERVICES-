@@ -1,12 +1,24 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import HseEnquiry from '@/models/HseEnquiry';
+import { supabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
-    await dbConnect();
-    const enquiries = await HseEnquiry.find({}).sort({ createdAt: -1 });
-    return NextResponse.json(enquiries);
+    const { data, error } = await supabase.from('hse_enquiries').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+
+    const formatted = data.map(eq => ({
+      _id: eq.id,
+      name: eq.name,
+      email: eq.email,
+      phone: eq.phone,
+      organisation: eq.organisation,
+      service: eq.service,
+      participants: eq.participants,
+      details: eq.details,
+      status: eq.status,
+      createdAt: eq.created_at
+    }));
+    return NextResponse.json(formatted);
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
@@ -14,16 +26,10 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
   try {
-    await dbConnect();
     const { id, status } = await req.json();
-
-    const enquiry = await HseEnquiry.findByIdAndUpdate(
-      id, 
-      { status }, 
-      { new: true }
-    );
-
-    return NextResponse.json({ success: true, enquiry });
+    const { data, error } = await supabase.from('hse_enquiries').update({ status }).eq('id', id).select().single();
+    if (error) throw error;
+    return NextResponse.json({ success: true, enquiry: data });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
@@ -31,11 +37,11 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    await dbConnect();
     const { id } = await req.json();
-    await HseEnquiry.findByIdAndDelete(id);
+    const { error } = await supabase.from('hse_enquiries').delete().eq('id', id);
+    if (error) throw error;
     return NextResponse.json({ success: true, message: "Enquiry Deleted" });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
-}
+      }
