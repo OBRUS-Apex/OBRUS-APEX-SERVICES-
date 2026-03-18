@@ -1,33 +1,42 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import User from '@/models/User';
-import Application from '@/models/Application';
-import { sendEmployerApprovedEmail } from '@/lib/mail';
+import { supabase } from '@/lib/supabase';
 
 export async function PATCH(req: Request) {
   try {
-    await dbConnect();
     const { id, type, action } = await req.json();
 
+    if (!id || !type || !action) {
+      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Determine the correct status string based on the action
+    let newStatus = '';
+    if (action === 'approve') {
+      newStatus = type === 'employer' ? 'active' : 'vetted';
+    } else if (action === 'reject') {
+      newStatus = 'rejected';
+    }
+
+    // Employers live in the users table, Candidate applications live in the applications table
     if (type === 'employer') {
-      const status = action === 'approve' ? 'active' : 'rejected';
-      const user = await User.findByIdAndUpdate(
-        id, 
-        { status, 'employerProfile.isApproved': action === 'approve' },
-        { new: true }
-      );
-      if (action === 'approve') await sendEmployerApprovedEmail(user.email, user.employerProfile.companyName);
-      return NextResponse.json({ success: true, message: "Employer Registry Updated" });
+      const { error } = await supabase
+        .from('users')
+        .update({ status: newStatus })
+        .eq('id', id);
+        
+      if (error) throw error;
+    } else if (type === 'candidate') {
+      const { error } = await supabase
+        .from('applications')
+        .update({ status: newStatus })
+        .eq('id', id);
+        
+      if (error) throw error;
     }
 
-    if (type === 'candidate') {
-      
-      await Application.findByIdAndUpdate(id, { status: action === 'approve' ? 'vetted' : 'rejected' });
-      return NextResponse.json({ success: true, message: "Professional Vetting Complete" });
-    }
+    return NextResponse.json({ success: true, message: 'Status updated' }, { status: 200 });
 
-    return NextResponse.json({ message: "Invalid category" }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ message: "Security update failure" }, { status: 500 });
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
-}
+  }
