@@ -237,9 +237,9 @@ export default function RecruitmentPage() {
                   {/* Meta */}
                   <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-400 mb-5">
                     <span className="flex items-center gap-1.5"><MapPin size={13} className="text-[#c8921e]"/> {job.location || 'Nigeria'}</span>
-                    {job.salaryRange?.min > 0 && (
-                      <span className="flex items-center gap-1.5"><DollarSign size={13} className="text-[#c8921e]"/> ₦{job.salaryRange.min.toLocaleString()} – ₦{job.salaryRange.max.toLocaleString()}</span>
-                    )}
+                    {job.salary && job.salary !== 'Negotiable' && (
+  <span className="flex items-center gap-1.5"><DollarSign size={13} className="text-[#c8921e]"/> {job.salary}</span>
+)}
                     <span className="flex items-center gap-1.5"><Clock size={13}/> {new Date(job.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
                   </div>
 
