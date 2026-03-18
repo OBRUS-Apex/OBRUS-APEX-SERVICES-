@@ -5,7 +5,8 @@ import {
   Plus, Briefcase, Users, X, Send,
   DollarSign, MapPin, ChevronRight, CheckCircle,
   FileText, Mail, Calendar, LogOut,
-  Home, Menu, Building2, Clock, AlertCircle
+  Home, Menu, Building2, Clock, AlertCircle,
+  Trash2, EyeOff, Eye
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +18,7 @@ export default function EmployerPortal() {
   const [view, setView] = useState<'overview' | 'jobs' | 'applicants'>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [postModal, setPostModal] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [jobs, setJobs] = useState<any[]>([]);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [applicants, setApplicants] = useState<any[]>([]);
@@ -54,10 +56,8 @@ export default function EmployerPortal() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: jobForm.title,
-          description: jobForm.description,
-          requirements: jobForm.requirements,
-          category: jobForm.category,
+          title: jobForm.title, description: jobForm.description,
+          requirements: jobForm.requirements, category: jobForm.category,
           location: jobForm.location,
           salaryRange: { min: Number(jobForm.minPay) || 0, max: Number(jobForm.maxPay) || 0 },
           employerId: user._id,
@@ -73,7 +73,40 @@ export default function EmployerPortal() {
         const err = await res.json().catch(() => ({}));
         toast.error(err.message || 'Failed to post job', { id: load });
       }
-    } catch { toast.error('Network error. Please try again.', { id: load }); }
+    } catch { toast.error('Network error', { id: load }); }
+  };
+
+  const handleToggleStatus = async (jobId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'open' ? 'closed' : 'open';
+    const load = toast.loading(newStatus === 'closed' ? 'Closing listing...' : 'Reopening listing...');
+    try {
+      const res = await fetch('/api/jobs', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId, status: newStatus })
+      });
+      if (res.ok) {
+        toast.success(newStatus === 'closed' ? 'Listing closed' : 'Listing reopened', { id: load });
+        fetchJobs(user._id);
+      } else toast.error('Failed to update status', { id: load });
+    } catch { toast.error('Network error', { id: load }); }
+  };
+
+  const handleDeleteJob = async (jobId: string) => {
+    const load = toast.loading('Deleting listing...');
+    try {
+      const res = await fetch('/api/jobs', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId })
+      });
+      if (res.ok) {
+        toast.success('Listing deleted', { id: load });
+        setConfirmDelete(null);
+        if (selectedJobId === jobId) { setSelectedJobId(null); setView('jobs'); }
+        fetchJobs(user._id);
+      } else toast.error('Failed to delete', { id: load });
+    } catch { toast.error('Network error', { id: load }); }
   };
 
   const openApplicants = async (jobId: string) => {
@@ -96,12 +129,8 @@ export default function EmployerPortal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ applicationId: appId })
       });
-      if (res.ok) {
-        toast.success('Offer sent!', { id: load });
-        openApplicants(selectedJobId!);
-      } else {
-        toast.error('Failed to send offer', { id: load });
-      }
+      if (res.ok) { toast.success('Offer sent!', { id: load }); openApplicants(selectedJobId!); }
+      else toast.error('Failed to send offer', { id: load });
     } catch { toast.error('Network error', { id: load }); }
   };
 
@@ -109,6 +138,7 @@ export default function EmployerPortal() {
   const switchView = (v: typeof view) => { setView(v); setSidebarOpen(false); };
   const isApproved = user?.status === 'active';
   const selectedJob = jobs.find(j => j._id === selectedJobId);
+  const activeJobs = jobs.filter(j => j.status === 'open');
   const viewTitles = { overview: 'Overview', jobs: 'My Job Listings', applicants: 'Applicants' };
 
   if (loading) return (
@@ -123,23 +153,43 @@ export default function EmployerPortal() {
 
       {sidebarOpen && <div className="fixed inset-0 bg-black/60 z-[90] md:hidden" onClick={() => setSidebarOpen(false)} />}
 
+      {/* Delete confirmation modal */}
+      <AnimatePresence>
+        {confirmDelete && (
+          <div className="fixed inset-0 z-[3000] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center">
+              <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5">
+                <Trash2 size={24} className="text-red-500"/>
+              </div>
+              <h3 className="font-serif text-xl font-bold text-[#0b1f3a] italic mb-2">Delete Listing?</h3>
+              <p className="text-slate-500 text-sm leading-relaxed mb-8">This will permanently remove the job listing and cannot be undone. All associated applicants will also be affected.</p>
+              <div className="flex gap-3">
+                <button onClick={() => setConfirmDelete(null)} className="flex-1 py-3 bg-[#f5f0e8] text-[#0b1f3a] rounded-2xl font-bold text-sm hover:bg-[#e8e3db] transition-all">Cancel</button>
+                <button onClick={() => handleDeleteJob(confirmDelete)} className="flex-1 py-3 bg-red-500 text-white rounded-2xl font-bold text-sm hover:bg-red-600 transition-all active:scale-95">Delete</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* SIDEBAR */}
       <aside
         style={{ transform: sidebarOpen ? 'translateX(0)' : undefined }}
         className="w-[260px] bg-[#060f1e] fixed inset-y-0 left-0 border-r border-white/5 z-[100] flex flex-col shadow-2xl -translate-x-full md:translate-x-0 transition-transform duration-300"
       >
-        <div className="p-6 border-b border-white/5 flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#c8921e] rounded-xl flex items-center justify-center font-black text-[#0b1f3a] text-lg italic shrink-0">O</div>
-          <div className="min-w-0">
-            <span className="block text-white font-bold text-sm leading-none truncate">{user?.employerProfile?.companyName || 'OBRUS'}</span>
-            <span className="text-[#e8b84b] text-[10px] uppercase tracking-widest opacity-60">Employer Portal</span>
+        <div className="p-5 border-b border-white/5">
+          <div className="bg-white rounded-xl px-2 py-1.5 inline-block">
+            <img src="/logo.png" alt="OBRUS Apex Services" className="h-8 w-auto" />
           </div>
+          <p className="text-[#e8b84b] text-[10px] uppercase tracking-widest opacity-60 mt-2 ml-1">Employer Portal</p>
         </div>
-        <nav className="p-4 flex-1 space-y-1 mt-6">
+
+        <nav className="p-4 flex-1 space-y-1 mt-4">
           <SidebarLink label="Overview" ico={<Home size={17}/>} active={view === 'overview'} onClick={() => switchView('overview')}/>
           <SidebarLink label="My Job Listings" ico={<Briefcase size={17}/>} active={view === 'jobs' || view === 'applicants'} onClick={() => switchView('jobs')}/>
           <SidebarLink label="Post a Job" ico={<Plus size={17}/>} active={false} onClick={() => { setSidebarOpen(false); setPostModal(true); }} disabled={!isApproved}/>
         </nav>
+
         <div className="p-6 border-t border-white/5">
           <button onClick={handleLogout} className="flex items-center gap-3 text-red-400/40 hover:text-red-400 font-semibold text-xs uppercase tracking-widest transition-all">
             <LogOut size={15}/> Log Out
@@ -183,9 +233,9 @@ export default function EmployerPortal() {
               )}
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
-                <KpiCard label="Active Listings" val={jobs.length} unit="Jobs" />
+                <KpiCard label="Active Listings" val={activeJobs.length} unit="Open" />
+                <KpiCard label="Total Listings" val={jobs.length} unit="All time" />
                 <KpiCard label="Account Status" val={isApproved ? 'Active' : 'Pending'} unit={isApproved ? 'Verified' : 'Review'} highlight={!isApproved}/>
-                <KpiCard label="Company" val={user?.employerProfile?.companyName?.split(' ')[0] || '—'} unit="Employer" />
               </div>
 
               <div className="bg-[#0b1f3a] p-8 md:p-12 rounded-3xl text-white relative overflow-hidden">
@@ -215,7 +265,10 @@ export default function EmployerPortal() {
                         <p className="font-bold text-sm text-[#0b1f3a]">{job.title}</p>
                         <p className="text-xs text-slate-400 mt-0.5">{job.location} · {job.category}</p>
                       </div>
-                      <ChevronRight size={15} className="text-slate-300 shrink-0"/>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-full ${job.status === 'open' ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-400'}`}>{job.status}</span>
+                        <ChevronRight size={15} className="text-slate-300 shrink-0"/>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -227,7 +280,7 @@ export default function EmployerPortal() {
           {view === 'jobs' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-slate-500">{jobs.length} listing{jobs.length !== 1 ? 's' : ''}</p>
+                <p className="text-sm text-slate-500">{jobs.length} listing{jobs.length !== 1 ? 's' : ''} · {activeJobs.length} active</p>
                 {isApproved && (
                   <button onClick={() => setPostModal(true)} className="flex items-center gap-1.5 text-xs font-bold text-[#c8921e] hover:underline">
                     <Plus size={13}/> Post new job
@@ -248,14 +301,13 @@ export default function EmployerPortal() {
                   {jobs.map((job: any) => (
                     <div
                       key={job._id}
-                      onClick={() => openApplicants(job._id)}
-                      className={`bg-white rounded-2xl border p-5 md:p-6 cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 ${selectedJobId === job._id ? 'border-[#c8921e] shadow-md' : 'border-[rgba(11,31,58,0.06)] shadow-sm'}`}
+                      className={`bg-white rounded-2xl border p-5 md:p-6 transition-all ${job.status === 'closed' ? 'opacity-60' : ''} ${selectedJobId === job._id ? 'border-[#c8921e] shadow-md' : 'border-[rgba(11,31,58,0.06)] shadow-sm hover:shadow-md'}`}
                     >
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openApplicants(job._id)}>
                           <div className="flex items-center gap-2 mb-2 flex-wrap">
                             <span className="text-[9px] font-bold uppercase tracking-widest bg-[#0b1f3a] text-white px-3 py-1 rounded-full">{job.category}</span>
-                            <span className="text-[9px] font-bold uppercase tracking-widest bg-green-50 text-green-600 px-3 py-1 rounded-full">{job.status}</span>
+                            <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${job.status === 'open' ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-500'}`}>{job.status}</span>
                           </div>
                           <h4 className="font-serif text-xl font-bold text-[#0b1f3a] italic mb-2">{job.title}</h4>
                           <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-400">
@@ -266,8 +318,30 @@ export default function EmployerPortal() {
                             <span className="flex items-center gap-1.5"><Clock size={12}/> {new Date(job.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
                           </div>
                         </div>
-                        <div className="w-9 h-9 bg-[#f0ede6] rounded-xl flex items-center justify-center text-[#0b1f3a] hover:bg-[#c8921e] hover:text-white transition-all shrink-0">
-                          <Users size={15}/>
+
+                        {/* Actions */}
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => handleToggleStatus(job._id, job.status)}
+                            className={`p-2.5 rounded-xl transition-all ${job.status === 'open' ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' : 'bg-green-50 text-green-600 hover:bg-green-500 hover:text-white'}`}
+                            title={job.status === 'open' ? 'Close listing' : 'Reopen listing'}
+                          >
+                            {job.status === 'open' ? <EyeOff size={15}/> : <Eye size={15}/>}
+                          </button>
+                          <button
+                            onClick={() => setConfirmDelete(job._id)}
+                            className="p-2.5 bg-red-50 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                            title="Delete listing"
+                          >
+                            <Trash2 size={15}/>
+                          </button>
+                          <button
+                            onClick={() => openApplicants(job._id)}
+                            className="p-2.5 bg-[#f0ede6] text-[#0b1f3a] rounded-xl hover:bg-[#c8921e] hover:text-white transition-all"
+                            title="View applicants"
+                          >
+                            <Users size={15}/>
+                          </button>
                         </div>
                       </div>
                       {job.description && <p className="text-sm text-slate-500 leading-relaxed mt-3 line-clamp-2">{job.description}</p>}
@@ -286,10 +360,13 @@ export default function EmployerPortal() {
               </button>
 
               {selectedJob && (
-                <div className="bg-white rounded-2xl border border-[rgba(11,31,58,0.06)] p-5 shadow-sm">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#c8921e] mb-1">{selectedJob.category}</p>
-                  <h3 className="font-serif text-xl font-bold text-[#0b1f3a] italic">{selectedJob.title}</h3>
-                  <p className="text-xs text-slate-400 mt-1">{selectedJob.location}</p>
+                <div className="bg-white rounded-2xl border border-[rgba(11,31,58,0.06)] p-5 shadow-sm flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#c8921e] mb-1">{selectedJob.category}</p>
+                    <h3 className="font-serif text-xl font-bold text-[#0b1f3a] italic">{selectedJob.title}</h3>
+                    <p className="text-xs text-slate-400 mt-1">{selectedJob.location}</p>
+                  </div>
+                  <span className={`text-[9px] font-bold uppercase px-3 py-1.5 rounded-full shrink-0 ${selectedJob.status === 'open' ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-500'}`}>{selectedJob.status}</span>
                 </div>
               )}
 
@@ -302,7 +379,7 @@ export default function EmployerPortal() {
                 <div className="py-28 text-center bg-white rounded-2xl border border-[rgba(11,31,58,0.06)]">
                   <Users size={40} className="mx-auto mb-4 text-slate-200"/>
                   <p className="text-slate-400 text-sm font-semibold">No applicants yet</p>
-                  <p className="text-slate-300 text-xs mt-2 max-w-xs mx-auto leading-relaxed">Applicants will appear here once they apply and are reviewed by the OBRUS team.</p>
+                  <p className="text-slate-300 text-xs mt-2 max-w-xs mx-auto leading-relaxed">Applicants appear here once they apply and are reviewed by the OBRUS team.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
