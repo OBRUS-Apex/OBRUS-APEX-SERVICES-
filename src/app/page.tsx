@@ -40,7 +40,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#f5f0e8] font-sans text-[#0b1f3a] overflow-x-hidden">
 
-      {/* NAV */}
+     
       <nav className="fixed top-0 left-0 z-50 bg-[rgba(6,10,20,0.96)] backdrop-blur border-b border-[rgba(200,146,30,0.16)]" style={{ width: '100vw', right: 0 }}>
         <div className="px-5 h-16 flex items-center justify-between max-w-6xl mx-auto">
           <Link href="/" className="flex items-center gap-3 shrink-0">
@@ -101,14 +101,12 @@ export default function HomePage() {
         )}
       </nav>
 
-      {/* HERO */}
+      
       <section className="min-h-screen flex items-center px-5 py-24 bg-[#060f1e] relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#c8921e]/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#1a7a4a]/5 rounded-full blur-[100px] pointer-events-none" />
         <div className="relative z-10 max-w-6xl mx-auto w-full">
-          <div className="inline-flex items-center gap-2 bg-[rgba(200,146,30,0.12)] border border-[rgba(200,146,30,0.25)] rounded-full px-4 py-1.5 text-xs text-[#e8b84b] uppercase tracking-widest mb-6">
-            🏆 Port Harcourt, Rivers State
-          </div>
+          
           <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl text-white font-bold leading-[1.1] mb-6">
             Apex Services.<br/><span className="text-[#c8921e] italic font-medium">Exceptional Standards.</span>
           </h1>
@@ -134,7 +132,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SERVICES */}
+      
       <section className="py-20 md:py-32 px-5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
@@ -154,7 +152,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* WHY OBRUS */}
+    
       <section className="bg-[#060f1e] py-20 md:py-32 px-5">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-center">
           <div>
@@ -194,7 +192,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA */}
+   
       <section className="py-20 md:py-32 px-5 bg-[#f5f0e8]">
         <div className="max-w-5xl mx-auto bg-gradient-to-br from-[#060f1e] to-[#0b1f3a] rounded-3xl p-10 md:p-20 text-center relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-80 h-80 bg-[#c8921e]/5 rounded-full blur-3xl pointer-events-none" />
@@ -209,7 +207,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FOOTER */}
+     
       <footer className="bg-[#060f1e] py-12 px-5 border-t border-white/5">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
