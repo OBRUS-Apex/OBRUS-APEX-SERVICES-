@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 
 export default function ClientPortal() {
   const router = useRouter();
@@ -20,7 +21,6 @@ export default function ClientPortal() {
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
-  // FIX: priority default matches model enum
   const [requestForm, setRequestForm] = useState({
     location: '', priority: 'Normal Ops', targetDate: '', details: ''
   });
@@ -33,7 +33,6 @@ export default function ClientPortal() {
     fetchData(parsedUser._id);
   }, [router]);
 
-  // FIX: check res.ok before parsing JSON to avoid silent crashes
   const fetchData = async (userId: string) => {
     try {
       const [reqRes, invRes] = await Promise.all([
@@ -78,30 +77,48 @@ export default function ClientPortal() {
     e.preventDefault();
     if (!receiptFile) return toast.error('Please select a receipt file');
     const load = toast.loading('Uploading payment proof...');
+    
     try {
+      // 1. Upload the file to Supabase Storage Bucket ('receipts')
+      const fileExt = receiptFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('receipts')
+        .upload(fileName, receiptFile);
+
+      if (uploadError) throw new Error('Failed to upload receipt to server.');
+
+      // 2. Get the public URL of the uploaded image
+      const { data: { publicUrl } } = supabase.storage
+        .from('receipts')
+        .getPublicUrl(fileName);
+
+      // 3. Send the REAL URL to our API
       const res = await fetch('/api/client/invoices/reconcile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           invoiceId: selectedInvoice._id,
-          receiptUrl: 'https://cloudinary-placeholder.com/receipt.jpg'
+          receiptUrl: publicUrl
         })
       });
+
       if (res.ok) {
         toast.success('Payment proof submitted — pending admin review', { id: load });
         setSelectedInvoice(null);
+        setReceiptFile(null); // Clear the selected file
         fetchData(user._id);
       } else {
         toast.error('Upload failed. Please try again.', { id: load });
       }
-    } catch {
-      toast.error('Network error. Please try again.');
+    } catch (err: any) {
+      toast.error(err.message || 'Network error. Please try again.', { id: load });
     }
   };
 
   const handleLogout = () => { localStorage.clear(); router.push('/auth'); };
 
-  // FIX: model uses 'unpaid' not 'pending'
   const totalUnpaid = Array.isArray(invoices)
     ? invoices.filter(i => i.status === 'unpaid').reduce((acc, curr) => acc + curr.amount, 0)
     : 0;
@@ -210,7 +227,6 @@ export default function ClientPortal() {
                 </div>
               </div>
 
-              {/* Recent requests — always shown with proper empty state */}
               <div className="bg-white rounded-2xl border border-[rgba(11,31,58,0.06)] overflow-hidden">
                 <div className="p-5 border-b border-[rgba(11,31,58,0.05)] flex items-center justify-between">
                   <h3 className="font-semibold text-[#0b1f3a]">Recent Requests</h3>
@@ -289,13 +305,10 @@ export default function ClientPortal() {
                     ) : (
                       invoices.map((inv: any) => (
                         <tr key={inv._id} className="hover:bg-[#f9f8f6] transition-all">
-                          {/* FIX: model uses invoiceNumber not id */}
                           <td className="p-4 md:p-6 font-mono text-sm font-bold text-[#0b1f3a]">{inv.invoiceNumber || 'INV-001'}</td>
-                          {/* FIX: model uses serviceType not service */}
                           <td className="p-4 md:p-6 font-serif font-bold text-[#0b1f3a] italic">{inv.serviceType}</td>
                           <td className="p-4 md:p-6 font-bold text-[#0b1f3a]">₦{inv.amount?.toLocaleString()}</td>
                           <td className="p-4 md:p-6">
-                            {/* FIX: model status is 'unpaid' not 'pending' */}
                             {inv.status === 'unpaid' ? (
                               <button onClick={() => setSelectedInvoice(inv)} className="bg-[#0b1f3a] text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#c8921e] transition-all active:scale-95">
                                 Pay Now
@@ -350,7 +363,7 @@ export default function ClientPortal() {
                     ) : (
                       requests.map((r: any) => (
                         <tr key={r._id} className="hover:bg-[#f9f8f6] transition-colors">
-                          <td className="p-4 md:p-6 font-mono text-xs text-[#0b1f3a]/50">{r._id.substring(0, 10)}</td>
+                          <td className="p-4 md:p-6 font-mono text-xs text-[#0b1f3a]/50">{r._id?.substring(0, 10) || r._id}</td>
                           <td className="p-4 md:p-6 font-serif font-bold text-[#0b1f3a] italic">{r.serviceType}</td>
                           <td className="p-4 md:p-6 text-xs font-semibold text-slate-400">{new Date(r.createdAt).toDateString()}</td>
                           <td className="p-4 md:p-6">
@@ -394,7 +407,6 @@ export default function ClientPortal() {
                   </div>
                   <div>
                     <label className="field-label">Priority Level</label>
-                    {/* FIX: option values match model enum exactly */}
                     <select className="field-input" onChange={e => setRequestForm({...requestForm, priority: e.target.value})}>
                       <option value="Normal Ops">Normal</option>
                       <option value="High Priority">High Priority</option>
