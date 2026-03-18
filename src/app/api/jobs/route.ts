@@ -1,16 +1,36 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import Job from '@/models/Job';
+import { supabase } from '@/lib/supabase';
 
 export async function GET(req: Request) {
   try {
-    await dbConnect();
     const { searchParams } = new URL(req.url);
     const employerId = searchParams.get('employerId');
-    // Employer view: all their jobs. Public recruitment page: only open jobs.
-    const query = employerId ? { employerId } : { status: 'open' };
-    const jobs = await Job.find(query).sort({ createdAt: -1 });
-    return NextResponse.json(jobs);
+    
+    let query = supabase.from('jobs').select('*').order('created_at', { ascending: false });
+    if (employerId) {
+      query = query.eq('employer_id', employerId);
+    } else {
+      query = query.eq('status', 'open');
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    const formatted = data.map(job => ({
+      _id: job.id,
+      employerId: job.employer_id,
+      title: job.title,
+      description: job.description,
+      category: job.category,
+      location: job.location,
+      type: job.type,
+      salary: job.salary,
+      requirements: job.requirements,
+      status: job.status,
+      createdAt: job.created_at
+    }));
+
+    return NextResponse.json(formatted);
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
@@ -18,48 +38,53 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    await dbConnect();
     const { title, description, requirements, category, location, salaryRange, employerId } = await req.json();
-    const job = await Job.create({
+    
+    // Map the old Mongoose object style to our new Postgres columns
+    const formattedSalary = salaryRange ? `₦${salaryRange.min} - ₦${salaryRange.max}` : 'Negotiable';
+    const reqArray = typeof requirements === 'string' ? [requirements] : requirements;
+
+    const { data, error } = await supabase.from('jobs').insert([{
+      employer_id: employerId,
       title,
       description: description || 'See job details',
-      requirements: requirements || 'To be discussed',
       category: category || 'HSE Consultancy',
       location: location || 'Nigeria',
-      salaryRange: salaryRange || { min: 0, max: 0 },
-      employerId,
-    });
-    return NextResponse.json({ success: true, job }, { status: 201 });
+      type: 'Contract', 
+      salary: formattedSalary,
+      requirements: reqArray || ['To be discussed']
+    }]).select().single();
+
+    if (error) throw error;
+    data._id = data.id; // Map for frontend
+    return NextResponse.json({ success: true, job: data }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ message: error.message || 'Failed to post job' }, { status: 500 });
   }
 }
 
-// Toggle open/closed
 export async function PATCH(req: Request) {
   try {
-    await dbConnect();
     const { jobId, status } = await req.json();
-    if (!jobId || !['open', 'closed'].includes(status)) {
-      return NextResponse.json({ message: 'Invalid request' }, { status: 400 });
-    }
-    const job = await Job.findByIdAndUpdate(jobId, { status }, { new: true });
-    if (!job) return NextResponse.json({ message: 'Job not found' }, { status: 404 });
-    return NextResponse.json({ success: true, job });
+    if (!jobId || !['open', 'closed'].includes(status)) return NextResponse.json({ message: 'Invalid request' }, { status: 400 });
+    
+    const { data, error } = await supabase.from('jobs').update({ status }).eq('id', jobId).select().single();
+    if (error || !data) return NextResponse.json({ message: 'Job not found' }, { status: 404 });
+    return NextResponse.json({ success: true, job: data });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
 
-// Permanent delete
 export async function DELETE(req: Request) {
   try {
-    await dbConnect();
     const { jobId } = await req.json();
     if (!jobId) return NextResponse.json({ message: 'Job ID required' }, { status: 400 });
-    await Job.findByIdAndDelete(jobId);
+    
+    const { error } = await supabase.from('jobs').delete().eq('id', jobId);
+    if (error) throw error;
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
-}
+  }
