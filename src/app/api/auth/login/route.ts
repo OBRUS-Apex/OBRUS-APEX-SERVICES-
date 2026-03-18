@@ -1,45 +1,48 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import User from '@/models/User';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
   try {
-    await dbConnect();
     const { email, password } = await req.json();
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return NextResponse.json({ message: 'No account found with that email.' }, { status: 401 });
+    // 1. Authenticate via Supabase
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError || !authData.session) {
+      return NextResponse.json({ message: 'Incorrect email or password. Please try again.' }, { status: 401 });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return NextResponse.json({ message: 'Incorrect password. Please try again.' }, { status: 401 });
+    // 2. Fetch the custom user profile details
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+
+    if (userError || !userData) {
+      return NextResponse.json({ message: 'User profile not found.' }, { status: 404 });
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET as string,
-      { expiresIn: '12h' }
-    );
-
+    // 3. Return payload formatted exactly how the frontend expects it
     return NextResponse.json({
       success: true,
-      token,
+      token: authData.session.access_token, // Supabase native JWT
       user: {
-        _id: user._id,        // FIX: was 'id' — portals all use user._id
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        userType: user.userType,
-        status: user.status,
-        employerProfile: user.employerProfile,
+        _id: userData.id,        // Keeping '_id' so frontend portals don't break
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        role: userData.role,
+        userType: userData.user_type,
+        status: userData.status,
+        employerProfile: userData.employer_profile,
       }
     }, { status: 200 });
+
   } catch (error: any) {
     return NextResponse.json({ message: 'Login failed. Please try again.' }, { status: 500 });
   }
-}
+          }
