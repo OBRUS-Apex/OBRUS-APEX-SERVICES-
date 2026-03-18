@@ -4,9 +4,8 @@ import Link from 'next/link';
 import { 
   ArrowRight, ShieldCheck, Zap, Menu, X, Phone, Mail, 
   Briefcase, BarChart, Settings, CheckCircle, User, LogOut,
-  Target, ClipboardCheck, Scale
+  Target, ClipboardCheck, Scale, MapPin
 } from 'lucide-react';
-
 const NAV_LINKS = [
   { href: '/recruitment', label: 'Recruitment' },
   { href: '/environmental', label: 'Environmental' },
