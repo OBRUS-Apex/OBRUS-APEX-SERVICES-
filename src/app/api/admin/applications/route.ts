@@ -1,23 +1,22 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import Application from '@/models/Application';
+import { supabase } from '@/lib/supabase';
 
 export async function PATCH(req: Request) {
   try {
-    await dbConnect();
     const { applicationId, status } = await req.json(); 
 
     if (!applicationId || !status) {
       return NextResponse.json({ message: "Target ID and Status required" }, { status: 400 });
     }
 
-    const application = await Application.findByIdAndUpdate(
-      applicationId,
-      { status },
-      { new: true }
-    );
+    const { data, error } = await supabase
+      .from('applications')
+      .update({ status })
+      .eq('id', applicationId)
+      .select()
+      .single();
 
-    if (!application) {
+    if (error || !data) {
       return NextResponse.json({ message: "Application node not found" }, { status: 404 });
     }
 
