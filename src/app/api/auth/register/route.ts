@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase'; // The new client we created
+import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
   try {
@@ -20,10 +20,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: authError.message }, { status: 400 });
     }
 
+    // SAFETY CHECK: If Supabase returns no user, the email is already taken or unconfirmed
+    if (!authData.user) {
+      return NextResponse.json({ 
+        message: "This email is already registered. Please log in instead." 
+      }, { status: 400 });
+    }
+
     let status = 'active';
     let role = 'client';
 
-    // Same admin check logic as before
     if (email === process.env.ADMIN_EMAIL) {
       role = 'admin';
     } else if (userType === 'employer') {
@@ -35,7 +41,7 @@ export async function POST(req: Request) {
       .from('users')
       .insert([
         {
-          id: authData.user!.id, // Links directly to Supabase Auth UUID
+          id: authData.user.id,
           name,
           email,
           phone,
@@ -47,8 +53,7 @@ export async function POST(req: Request) {
       ]);
 
     if (dbError) {
-      // Cleanup auth user if DB insert fails (optional but good practice)
-      return NextResponse.json({ message: "Failed to create user profile" }, { status: 500 });
+      return NextResponse.json({ message: "Failed to create user profile. Please try again." }, { status: 500 });
     }
 
     return NextResponse.json({ 
@@ -60,4 +65,4 @@ export async function POST(req: Request) {
   } catch (error: any) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
-            }
+                                }
