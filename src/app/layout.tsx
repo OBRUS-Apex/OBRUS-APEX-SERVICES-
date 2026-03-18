@@ -18,8 +18,9 @@ const jost = Jost({
 });
 
 export const metadata: Metadata = {
-  title: "OBRUS APEX SERVICES | Integrated Corporate Solutions",
-  description: "Professional Recruitment, Waste Management, HSE Consultancy, and Facility Maintenance Services.",
+  title: "OBRUS APEX SERVICES | Partner in Excellence, Safety, & Operational Efficiency",
+  // Updated to client's requested SEO Meta Description
+  description: "Obrus Apex Services provides expert facility management, HSE compliance, manpower deployment, and equipment procurement solutions to help your business operate safely and efficiently.",
 };
 
 export default function RootLayout({
@@ -57,4 +58,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-  }
+}
