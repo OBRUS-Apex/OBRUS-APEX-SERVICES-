@@ -1,31 +1,38 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import Application from '@/models/Application';
-import User from '@/models/User';
-import Job from '@/models/Job';
+import { supabase } from '@/lib/supabase';
 
 export async function GET(req: Request) {
   try {
-    await dbConnect();
     const { searchParams } = new URL(req.url);
     const jobId = searchParams.get('jobId');
     const employerId = searchParams.get('employerId');
     const candidateId = searchParams.get('candidateId');
     const status = searchParams.get('status');
 
-    let query: any = {};
-    if (jobId) query.jobId = jobId;
-    if (employerId) query.employerId = employerId;
-    if (candidateId) query.candidateId = candidateId;
-    if (status) query.status = status;
+    // Fetch applications AND join the Candidate details + Job details
+    let query = supabase.from('applications')
+      .select('*, candidateId:users!candidate_id(name, email, phone), jobId:jobs!job_id(title, category)')
+      .order('applied_at', { ascending: false });
 
-   
-    const applications = await Application.find(query)
-      .populate('candidateId', 'name email phone')
-      .populate('jobId', 'title category')
-      .sort({ createdAt: -1 });
+    if (jobId) query = query.eq('job_id', jobId);
+    if (employerId) query = query.eq('employer_id', employerId);
+    if (candidateId) query = query.eq('candidate_id', candidateId);
+    if (status) query = query.eq('status', status);
 
-    return NextResponse.json(applications);
+    const { data, error } = await query;
+    if (error) throw error;
+
+    const formatted = data.map(app => ({
+      _id: app.id,
+      jobId: app.jobId,
+      candidateId: app.candidateId,
+      employerId: app.employer_id,
+      cvUrl: app.cv_url,
+      status: app.status,
+      createdAt: app.applied_at
+    }));
+
+    return NextResponse.json(formatted);
   } catch (error: any) {
     return NextResponse.json({ message: "Data retrieval failure" }, { status: 500 });
   }
@@ -33,31 +40,29 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    await dbConnect();
     const { jobId, candidateId, employerId, cvUrl } = await req.json();
 
     if (!jobId || !candidateId || !employerId || !cvUrl) {
       return NextResponse.json({ message: "Incomplete documentation provided" }, { status: 400 });
     }
 
-    
-    const existing = await Application.findOne({ jobId, candidateId });
-    if (existing) {
-      return NextResponse.json({ message: "Duplicate submission detected for this node" }, { status: 400 });
-    }
+    const { data: existing } = await supabase.from('applications').select('id').eq('job_id', jobId).eq('candidate_id', candidateId).single();
+    if (existing) return NextResponse.json({ message: "Duplicate submission detected for this node" }, { status: 400 });
 
-    const newApplication = await Application.create({
-      jobId,
-      candidateId,
-      employerId,
-      cvUrl,
-      status: 'pending' 
-    });
+    const { data: newApp, error } = await supabase.from('applications').insert([{
+      job_id: jobId,
+      candidate_id: candidateId,
+      employer_id: employerId,
+      cv_url: cvUrl,
+      status: 'pending'
+    }]).select().single();
+
+    if (error) throw error;
 
     return NextResponse.json({ 
       success: true, 
       message: "Application securely logged in OBRUS registry.",
-      id: newApplication._id 
+      id: newApp.id 
     }, { status: 201 });
 
   } catch (error: any) {
