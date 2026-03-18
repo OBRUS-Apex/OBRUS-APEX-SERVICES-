@@ -43,13 +43,11 @@ export default function HomePage() {
      
       <nav className="fixed top-0 left-0 z-50 bg-[rgba(6,10,20,0.96)] backdrop-blur border-b border-[rgba(200,146,30,0.16)]" style={{ width: '100vw', right: 0 }}>
         <div className="px-5 h-16 flex items-center justify-between max-w-6xl mx-auto">
-          <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="w-8 h-8 bg-[#c8921e] rounded-lg flex items-center justify-center font-black text-[#0b1f3a] text-base italic">O</div>
-            <div>
-              <span className="block text-white font-bold text-sm leading-none">OBRUS</span>
-              <span className="text-[#e8b84b] text-[9px] uppercase tracking-widest">Apex Services</span>
-            </div>
-          </Link>
+          <Link href="/" className="shrink-0">
+  <div className="bg-white rounded-xl px-2 py-1.5">
+    <img src="/logo.png" alt="OBRUS Apex Services" className="h-8 w-auto" />
+  </div>
+</Link>
 
           <div className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map(({ href, label }) => (
