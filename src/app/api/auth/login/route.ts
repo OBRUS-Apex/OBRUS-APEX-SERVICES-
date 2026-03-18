@@ -11,12 +11,12 @@ export async function POST(req: Request) {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return NextResponse.json({ message: "Authentication failed" }, { status: 401 });
+      return NextResponse.json({ message: 'No account found with that email.' }, { status: 401 });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return NextResponse.json({ message: "Authentication failed" }, { status: 401 });
+      return NextResponse.json({ message: 'Incorrect password. Please try again.' }, { status: 401 });
     }
 
     const token = jwt.sign(
@@ -28,15 +28,18 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       token,
-      user: { 
-        id: user._id,
-        name: user.name, 
+      user: {
+        _id: user._id,        // FIX: was 'id' — portals all use user._id
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
         role: user.role,
         userType: user.userType,
-        status: user.status
+        status: user.status,
+        employerProfile: user.employerProfile,
       }
     }, { status: 200 });
   } catch (error: any) {
-    return NextResponse.json({ message: "Login execution error" }, { status: 500 });
+    return NextResponse.json({ message: 'Login failed. Please try again.' }, { status: 500 });
   }
 }
