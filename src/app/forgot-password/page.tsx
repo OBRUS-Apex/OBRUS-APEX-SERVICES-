@@ -1,26 +1,34 @@
 "use client";
 import React, { useState } from 'react';
-import { Mail, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { ArrowLeft, Mail, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { supabase } from '@/lib/supabase';
 
-export default function ForgotPassword() {
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [isSent, setIsSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) return toast.error('Please enter your email address');
+    
     setLoading(true);
+    const load = toast.loading('Sending reset link...');
+
     try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+      // Use Supabase's native password reset
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
-      const data = await res.json();
-      setMessage(data.message || 'If that email exists, a reset link has been sent.');
-    } catch {
-      setMessage('Failed to send email. Please try again.');
+
+      if (error) throw error;
+
+      toast.success('Reset link sent!', { id: load });
+      setIsSent(true);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send reset link', { id: load });
     } finally {
       setLoading(false);
     }
@@ -29,46 +37,36 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen bg-[#060f1e] flex items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute w-[500px] h-[500px] bg-[#c8921e]/10 rounded-full blur-[120px] -top-40 -right-40 pointer-events-none" />
-
-      <div className="relative w-full max-w-[420px]">
+      <div className="relative w-full max-w-[440px]">
         <Link href="/auth" className="flex items-center gap-2 text-white/30 hover:text-white text-sm mb-6 transition-all w-fit">
-          <ArrowLeft size={15}/> Back to Sign In
+          <ArrowLeft size={15}/> Back to login
         </Link>
-
-        <div className="bg-[#0b1f3a]/95 backdrop-blur-2xl border border-[#c8921e]/20 rounded-3xl p-10 shadow-2xl">
-          <div className="flex justify-center mb-6">
-            <div className="w-12 h-12 bg-[#c8921e]/10 border border-[#c8921e]/30 rounded-2xl flex items-center justify-center">
-              <Mail size={22} className="text-[#c8921e]"/>
-            </div>
+        <div className="bg-[#0b1f3a]/95 backdrop-blur-2xl border border-[#c8921e]/20 rounded-3xl p-8 sm:p-10 shadow-2xl">
+          <div className="text-center mb-8">
+            <h2 className="font-serif text-2xl text-white font-bold tracking-tight mb-2">Reset Password</h2>
+            <p className="text-white/40 text-xs leading-relaxed">
+              {isSent ? 'Check your email inbox for the secure reset link.' : 'Enter your registered email address and we will send you a secure link to reset your password.'}
+            </p>
           </div>
-          <h2 className="font-serif text-2xl text-white font-bold text-center mb-2">Reset Password</h2>
-          <p className="text-white/40 text-center text-sm mb-8">Enter your email and we'll send you a reset link.</p>
-
-          {message ? (
-            <div className="text-center p-4 bg-[#c8921e]/10 text-[#e8b84b] rounded-2xl text-sm mb-6 border border-[#c8921e]/20 leading-relaxed">
-              {message}
-            </div>
-          ) : (
+          {!isSent ? (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative">
-                <input
-                  type="email"
-                  required
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-5 text-white focus:border-[#c8921e] outline-none transition-all placeholder:text-white/20 font-medium"
-                  placeholder="Your email address"
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+                <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm font-medium text-white outline-none focus:border-[#c8921e] transition-all" placeholder="Email Address"/>
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18}/>
               </div>
-              <button
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-[#c8921e] to-[#e8b84b] text-[#0b1f3a] py-4 rounded-2xl font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 hover:-translate-y-0.5 transition-all disabled:opacity-50"
-              >
-                {loading ? <Loader2 className="animate-spin" size={18}/> : 'Send Reset Link'}
+              <button disabled={loading} className="w-full bg-[#c8921e] text-[#0b1f3a] py-4 rounded-2xl font-bold text-sm uppercase tracking-widest hover:bg-[#e8b84b] transition-all disabled:opacity-50">
+                {loading ? <Loader2 className="animate-spin mx-auto" size={18}/> : 'Send Reset Link'}
               </button>
             </form>
+          ) : (
+            <div className="text-center">
+              <button onClick={() => { setIsSent(false); setEmail(''); }} className="text-[#c8921e] text-xs font-bold uppercase tracking-widest hover:underline">
+                Try another email
+              </button>
+            </div>
           )}
         </div>
       </div>
     </div>
   );
-}
+                }
