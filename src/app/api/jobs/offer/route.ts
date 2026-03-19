@@ -1,19 +1,28 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import Application from '@/models/Application';
-import User from '@/models/User';
-import { sendJobOfferEmail } from '@/lib/mail';
+import { supabase } from '@/lib/supabase';
 
 export async function PATCH(req: Request) {
   try {
-    await dbConnect();
     const { applicationId } = await req.json();
-    const app = await Application.findByIdAndUpdate(applicationId, { status: 'offered' }).populate('candidateId jobId');
-    
-    await sendJobOfferEmail(app.candidateId.email, app.candidateId.name, app.jobId.title);
-    
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ message: "Offer dispatch failed" }, { status: 500 });
+
+    if (!applicationId) {
+      return NextResponse.json({ message: "Application ID is required" }, { status: 400 });
+    }
+
+    // Update the application status to 'offered'
+    const { data, error } = await supabase
+      .from('applications')
+      .update({ status: 'offered' })
+      .eq('id', applicationId)
+      .select()
+      .single();
+
+    if (error || !data) {
+      return NextResponse.json({ message: "Application not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, application: data });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
