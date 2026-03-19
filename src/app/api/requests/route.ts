@@ -1,22 +1,28 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import ServiceRequest from '@/models/ServiceRequest';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
   try {
-    await dbConnect();
-    const data = await req.json();
-    const newRequest = await ServiceRequest.create(data);
-    return NextResponse.json({ success: true, request: newRequest }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ message: "Failed to broadcast request node" }, { status: 500 });
-  }
-}
+    const body = await req.json();
+    const { userId, serviceType, location, priority, targetDate, details } = body;
 
-export async function GET(req: Request) {
-  await dbConnect();
-  const { searchParams } = new URL(req.url);
-  const userId = searchParams.get('userId');
-  const history = await ServiceRequest.find({ userId }).sort({ createdAt: -1 });
-  return NextResponse.json(history);
+    const { data, error } = await supabase
+      .from('service_requests')
+      .insert([{
+        user_id: userId || null,
+        service_type: serviceType,
+        location,
+        priority: priority || 'Normal Ops',
+        target_date: targetDate,
+        details
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    return NextResponse.json({ success: true, request: data }, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
 }
