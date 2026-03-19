@@ -1,107 +1,74 @@
 "use client";
-import React, { useState, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Lock, Loader2, CheckCircle, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Lock, Loader2, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { supabase } from '@/lib/supabase';
 
-function ResetPasswordForm() {
-  const searchParams = useSearchParams();
+export default function ResetPasswordPage() {
   const router = useRouter();
-  const token = searchParams.get('token');
-
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+
+  // Supabase automatically handles the hash token in the URL for us.
+  // If a user lands here without a valid session token, we can redirect them.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        toast.error("Invalid or expired reset link.");
+        router.push('/auth');
+      }
+    });
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) { setError('Invalid or missing reset token.'); return; }
+    if (password.length < 6) return toast.error('Password must be at least 6 characters');
+
     setLoading(true);
-    setError('');
+    const load = toast.loading('Updating password...');
+
     try {
-      const res = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setSuccess(true);
-        setTimeout(() => router.push('/auth'), 3000);
-      } else {
-        setError(data.message || 'Failed to update password.');
-      }
-    } catch {
-      setError('A connection error occurred.');
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+
+      toast.success('Password updated successfully!', { id: load });
+      
+      // Force log out so they have to sign in with the new credentials
+      await supabase.auth.signOut();
+      localStorage.clear();
+      router.push('/auth');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update password', { id: load });
     } finally {
       setLoading(false);
     }
   };
 
-  if (success) return (
-    <div className="text-center p-10 bg-[#0b1f3a] rounded-3xl border border-[#c8921e]/20">
-      <div className="w-16 h-16 bg-green-500/10 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6">
-        <CheckCircle size={32}/>
-      </div>
-      <h2 className="text-white text-2xl font-serif font-bold mb-3">Password Updated</h2>
-      <p className="text-white/50 text-sm leading-relaxed">Your password has been updated. Redirecting to sign in...</p>
-    </div>
-  );
-
   return (
-    <div className="relative w-full max-w-[420px] bg-[#0b1f3a]/95 backdrop-blur-2xl border border-[#c8921e]/20 rounded-3xl p-10 shadow-2xl">
-      <div className="text-center mb-8">
-        <div className="w-12 h-12 bg-[#c8921e]/10 border border-[#c8921e]/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Lock size={20} className="text-[#c8921e]"/>
-        </div>
-        <h2 className="font-serif text-2xl text-white font-bold">Set New Password</h2>
-        <p className="text-white/40 text-sm mt-2">Create a strong password for your account.</p>
-      </div>
-
-      {error && (
-        <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-4 rounded-2xl">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="relative">
-          <input
-            type="password"
-            required
-            minLength={8}
-            className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:border-[#c8921e] outline-none transition-all placeholder:text-white/20 font-medium"
-            placeholder="New password (min. 8 characters)"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Lock className="absolute left-4 top-4 text-white/20" size={16}/>
-        </div>
-        <button
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-[#c8921e] to-[#e8b84b] text-[#0b1f3a] py-4 rounded-2xl font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 hover:-translate-y-0.5 transition-all disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="animate-spin" size={18}/> : 'Update Password'}
-        </button>
-      </form>
-    </div>
-  );
-}
-
-export default function ResetPasswordPage() {
-  return (
-    <div className="min-h-screen bg-[#060f1e] flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-[#060f1e] flex items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute w-[500px] h-[500px] bg-[#c8921e]/10 rounded-full blur-[120px] -top-40 -right-40 pointer-events-none" />
-      <Link href="/auth" className="flex items-center gap-2 text-white/30 hover:text-white text-sm mb-6 transition-all">
-        <ArrowLeft size={15}/> Back to Sign In
-      </Link>
-      <Suspense fallback={
-        <div className="text-white flex items-center gap-2 font-medium tracking-widest text-xs">
-          <Loader2 className="animate-spin text-[#c8921e]" size={16}/> Loading...
+      <div className="relative w-full max-w-[440px]">
+        <div className="bg-[#0b1f3a]/95 backdrop-blur-2xl border border-[#c8921e]/20 rounded-3xl p-8 sm:p-10 shadow-2xl">
+          <div className="text-center mb-8">
+            <h2 className="font-serif text-2xl text-white font-bold tracking-tight mb-2">Create New Password</h2>
+            <p className="text-white/40 text-xs">Enter a strong new password for your account.</p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative">
+              <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-12 py-4 text-sm font-medium text-white outline-none focus:border-[#c8921e] transition-all" placeholder="New Password (min 6 chars)"/>
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18}/>
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-[#c8921e] transition-all">
+                {showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
+              </button>
+            </div>
+            <button disabled={loading} className="w-full bg-[#c8921e] text-[#0b1f3a] py-4 rounded-2xl font-bold text-sm uppercase tracking-widest hover:bg-[#e8b84b] transition-all disabled:opacity-50">
+              {loading ? <Loader2 className="animate-spin mx-auto" size={18}/> : 'Update Password'}
+            </button>
+          </form>
         </div>
-      }>
-        <ResetPasswordForm />
-      </Suspense>
+      </div>
     </div>
   );
 }
