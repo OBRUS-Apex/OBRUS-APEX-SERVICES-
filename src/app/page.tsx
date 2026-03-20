@@ -59,7 +59,7 @@ export default function HomePage() {
           <div className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-widest">
             <Link href="/recruitment" className="hover:text-green-600 transition-colors">Recruitment</Link>
             <Link href="/hse" className="hover:text-green-600 transition-colors">Safety</Link>
-            <Link href="/portal/client" className="hover:text-green-600 transition-colors text-green-600 border border-green-600 px-4 py-2 rounded-lg">Access Portal</Link>
+            <Link href="/client/portal" className="hover:text-green-600 transition-colors text-green-600 border border-green-600 px-4 py-2 rounded-lg">Access Portal</Link>
           </div>
 
           <button onClick={() => setNavOpen(!navOpen)} className="p-2 text-[#0b1f3a]">
