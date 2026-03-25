@@ -33,7 +33,7 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
 
-    const authToast = toast.loading(isLogin ? 'Signing you in...' : 'Establishing account...');
+    const authToast = toast.loading(isLogin ? 'Signing you in...' : 'Setting up account...');
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
 
     const payload = isLogin 
@@ -63,12 +63,12 @@ export default function AuthPage() {
 
       if (isLogin) {
         if (data.user.status === 'pending') {
-          toast.error('Under Review: Your business profile is being audited by our admin.', { id: authToast, duration: 6000 });
+          toast.error('Account under review. Please wait for activation.', { id: authToast, duration: 6000 });
           setLoading(false);
           return;
         }
 
-        toast.success(`Welcome back`, { id: authToast });
+        toast.success(`Access Granted`, { id: authToast });
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
@@ -81,7 +81,7 @@ export default function AuthPage() {
           else window.location.href = '/recruitment';
         }, 1000);
       } else {
-        toast.success('Registration completed successfully!', { id: authToast });
+        toast.success('Account registered successfully!', { id: authToast });
         setIsLogin(true);
         setUserType(null);
       }
@@ -94,80 +94,69 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-green-50 to-blue-50 flex items-center justify-center p-6 font-sans">
-      
       <div className="relative w-full max-w-[500px]">
         <Link href="/" className="flex items-center gap-2 text-gray-400 hover:text-[#1a2e46] text-sm mb-6 transition-all group font-bold w-fit uppercase tracking-widest">
-          <ArrowLeft size={16} /> Main Website
+          <ArrowLeft size={16} /> Home
         </Link>
 
         <div className="bg-white rounded-[40px] p-10 shadow-2xl border border-gray-100 relative overflow-hidden">
           <div className="text-center mb-10">
             <div className="flex justify-center items-center gap-4 mb-6">
-              <img src="/logo.png" alt="O" className="h-10 w-auto object-contain" 
+              <img src="/logo.png" alt="OBRUS" className="h-10 w-auto object-contain" 
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement!.innerHTML = '<div class="w-10 h-10 bg-[#257242] rounded-xl flex items-center justify-center text-white font-bold italic shadow-md">O</div>';
+                  e.currentTarget.parentElement!.innerHTML = '<div class="w-10 h-10 bg-[#257242] rounded-xl flex items-center justify-center text-white font-bold italic shadow-md text-xl">O</div>';
                 }} 
               />
-              <div className="text-left border-l border-gray-200 pl-4">
-                 <h1 className="text-[#1a2e46] font-serif font-black text-2xl leading-none">OBRUS APEX</h1>
-                 <p className="text-[#257242] text-[10px] font-black uppercase tracking-widest mt-0.5">Unified Hub</p>
+              <div className="text-left border-l border-gray-200 pl-4 text-[#1a2e46] font-serif font-black text-2xl leading-none">
+                 OBRUS APEX
               </div>
             </div>
             
             <h2 className="text-3xl font-extrabold text-[#1a2e46] tracking-tighter">
-              {isLogin ? 'Member Login' : 'Start Partnership'}
+              {isLogin ? 'Secure Sign In' : 'Join Our Network'}
             </h2>
             <p className="text-gray-500 text-sm font-medium mt-1">
-              {isLogin ? 'Access your authorized dashboard' : 'Please identify your account path'}
+              {isLogin ? 'Enter your account details' : 'Choose how you want to partner with us'}
             </p>
           </div>
 
           {!isLogin && !userType ? (
             <div className="space-y-4 animate-in fade-in zoom-in-95 duration-500">
-               <PathCard ico={<Briefcase size={22}/>} title="Candidate" desc="I am looking for job vacancies" onClick={() => setUserType('candidate')} />
-               <PathCard ico={<Building size={22}/>} title="Employer" desc="Sourcing or outsourcing talent" onClick={() => setUserType('employer')} />
-               <PathCard ico={<ClipboardList size={22}/>} title="Services" desc="Booking HSE or facility solutions" onClick={() => setUserType('service')} />
+               <PathCard ico={<Briefcase size={22}/>} title="Candidate" desc="I want to apply for jobs" onClick={() => setUserType('candidate')} />
+               <PathCard ico={<Building size={22}/>} title="Employer" desc="I want to hire skilled staff" onClick={() => setUserType('employer')} />
+               <PathCard ico={<ClipboardList size={22}/>} title="Service Client" desc="I need facility or safety services" onClick={() => setUserType('service')} />
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 animate-in slide-in-from-bottom-8">
               {!isLogin && (
-                <button type="button" onClick={() => setUserType(null)} className="text-[10px] font-black uppercase text-[#257242] hover:text-[#1a2e46] transition-colors flex items-center gap-2 mb-4 tracking-widest underline underline-offset-4 decoration-[#257242]/20">
+                <button type="button" onClick={() => setUserType(null)} className="text-[10px] font-black uppercase text-[#257242] flex items-center gap-2 mb-4 tracking-widest underline decoration-[#257242]/20">
                   <ArrowLeft size={14}/> Back to paths
                 </button>
               )}
 
               {!isLogin && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="relative">
-                    <input required className="input-field" placeholder="Full Name" onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                    <UserIcon className="input-icon" size={18}/>
-                  </div>
-                  <div className="relative">
-                    <input required className="input-field" placeholder="Phone Number" onChange={(e) => setFormData({...formData, phone: e.target.value})} />
-                    <Phone className="input-icon" size={18}/>
-                  </div>
+                  <div className="relative"><input required className="input-field" placeholder="Legal Name" onChange={(e) => setFormData({...formData, name: e.target.value})} /><UserIcon className="input-icon" size={18}/></div>
+                  <div className="relative"><input required className="input-field" placeholder="Phone Link" onChange={(e) => setFormData({...formData, phone: e.target.value})} /><Phone className="input-icon" size={18}/></div>
                 </div>
               )}
 
-              <div className="relative">
-                <input required type="email" className="input-field" placeholder="Email Address" onChange={(e) => setFormData({...formData, email: e.target.value})} />
-                <Mail className="input-icon" size={18}/>
-              </div>
+              <div className="relative"><input required type="email" className="input-field" placeholder="Email Address" onChange={(e) => setFormData({...formData, email: e.target.value})} /><Mail className="input-icon" size={18}/></div>
 
               {!isLogin && userType === 'employer' && (
                 <div className="space-y-4 pt-4 border-t border-gray-100">
-                  <p className="text-[10px] font-black text-gray-300 text-center uppercase tracking-widest italic">Verification Data</p>
-                  <div className="relative"><input required className="input-field" placeholder="Organization Name" onChange={(e) => setFormData({...formData, companyName: e.target.value})} /><Building className="input-icon" size={18}/></div>
+                  <p className="text-[10px] font-black text-gray-300 text-center uppercase tracking-widest italic">Corporate Profile</p>
+                  <div className="relative"><input required className="input-field" placeholder="Company Name" onChange={(e) => setFormData({...formData, companyName: e.target.value})} /><Building className="input-icon" size={18}/></div>
                   <div className="relative"><input required className="input-field" placeholder="CAC RC Number" onChange={(e) => setFormData({...formData, rcNumber: e.target.value})} /><ShieldCheck className="input-icon" size={18}/></div>
-                  <div className="relative"><textarea required className="input-field h-24 py-4 resize-none" placeholder="Company Physical Address" onChange={(e) => setFormData({...formData, officeAddress: e.target.value})} /><MapPin className="input-icon top-5" size={18}/></div>
+                  <div className="relative"><textarea required className="input-field h-24 py-4 resize-none" placeholder="Head Office Address" onChange={(e) => setFormData({...formData, officeAddress: e.target.value})} /><MapPin className="input-icon top-5" size={18}/></div>
                 </div>
               )}
 
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center px-1">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Secured Key</label>
-                  {isLogin && <Link href="/forgot-password" size="sm" className="text-[10px] text-[#257242] font-black uppercase hover:text-[#1a2e46] transition-all">Recover ID?</Link>}
+                  {isLogin && <Link href="/forgot-password" className="text-[10px] text-[#257242] font-black uppercase hover:text-[#1a2e46] transition-all">Recover Password?</Link>}
                 </div>
                 <div className="relative">
                   <input type={showPassword ? "text" : "password"} required className="input-field" placeholder="••••••••" 
@@ -176,23 +165,23 @@ export default function AuthPage() {
                       if (!isLogin) checkStrength(e.target.value);
                     }} 
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-gray-300 hover:text-[#257242] transition-colors">
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-gray-300 hover:text-[#257242]">
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                   <Lock className="input-icon" size={18}/>
                 </div>
               </div>
 
-              <button disabled={loading} className="w-full mt-6 bg-[#1a2e46] text-white py-4.5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-xl hover:bg-[#257242] transform active:scale-[0.98] transition-all flex items-center justify-center gap-3">
-                {loading ? <Loader2 className="animate-spin" size={18} /> : isLogin ? 'Access Hub' : 'Register identity'}
+              <button disabled={loading} className="w-full mt-6 bg-[#1a2e46] text-white py-4.5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-xl hover:bg-[#257242] transition-all flex items-center justify-center gap-3">
+                {loading ? <Loader2 className="animate-spin" size={18} /> : isLogin ? 'Launch Dashboard' : 'Initiate Partnership'}
               </button>
             </form>
           )}
 
           <div className="mt-12 text-center border-t border-gray-50 pt-10">
-            <button onClick={() => { setIsLogin(!isLogin); setUserType(null); }} className="text-gray-400 text-[10px] font-bold tracking-widest uppercase transition-all hover:text-[#1a2e46]">
-              {isLogin ? "First mission here?" : "Authorized member?"} 
-              <span className="text-[#257242] font-black ml-4 bg-green-50 px-4 py-2 rounded-full border border-green-100 hover:bg-[#257242] hover:text-white transition-all italic">
+            <button onClick={() => { setIsLogin(!isLogin); setUserType(null); }} className="text-gray-400 text-[10px] font-bold tracking-widest uppercase transition-all">
+              {isLogin ? "No access node yet?" : "Have an authorized login?"} 
+              <span className="text-[#257242] font-black ml-4 bg-green-50 px-4 py-2 rounded-full border border-green-100 italic transition-all hover:bg-[#257242] hover:text-white">
                 {isLogin ? 'Sign Up' : 'Log In'}
               </span>
             </button>
@@ -215,9 +204,9 @@ export default function AuthPage() {
 
 function PathCard({ ico, title, desc, onClick }: any) {
   return (
-    <button onClick={onClick} className="w-full group p-8 bg-[#fdfdfd] border border-gray-100 rounded-[35px] flex items-center justify-between hover:border-[#257242] hover:shadow-2xl transition-all text-left">
+    <button onClick={onClick} className="w-full group p-8 bg-[#fdfdfd] border border-gray-100 rounded-[35px] flex items-center justify-between hover:border-[#257242] transition-all text-left">
       <div className="flex gap-6 items-center">
-        <div className="w-16 h-16 bg-[#1a2e46] text-white rounded-3xl flex items-center justify-center shadow-lg border border-gray-100 transition-transform duration-500 group-hover:rotate-12 group-hover:bg-[#257242]">{ico}</div>
+        <div className="w-16 h-16 bg-[#1a2e46] text-white rounded-3xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 group-hover:bg-[#257242]">{ico}</div>
         <div>
           <span className="block text-[#1a2e46] font-black text-xl uppercase tracking-tighter leading-none mb-1.5 italic">{title}</span>
           <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{desc}</span>
