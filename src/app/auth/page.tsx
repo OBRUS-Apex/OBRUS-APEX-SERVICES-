@@ -1,16 +1,14 @@
 "use client";
 import React, { useState } from 'react';
-import {
-  Eye, EyeOff, Lock, Mail, User as UserIcon,
-  Briefcase, Building, ChevronRight, ArrowLeft,
-  Loader2, MapPin, Phone, ShieldCheck, ClipboardList
+import { 
+  Eye, EyeOff, Lock, Mail, User as UserIcon, 
+  Briefcase, Building, ChevronRight, ArrowLeft, 
+  Loader2, MapPin, Phone, ShieldCheck, ClipboardList 
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 export default function AuthPage() {
-  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [userType, setUserType] = useState<null | 'candidate' | 'employer' | 'service'>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -35,23 +33,22 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
 
-    const authToast = toast.loading(isLogin ? 'Signing you in...' : 'Creating your account...');
+    const authToast = toast.loading(isLogin ? 'Signing you in...' : 'Establishing account...');
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
 
-    const payload = isLogin
+    const payload = isLogin 
       ? { email: formData.email, password: formData.password }
-      : {
+      : { 
           name: formData.name,
           email: formData.email,
           password: formData.password,
           phone: formData.phone,
-          userType,
+          userType: userType, 
           employerProfile: userType === 'employer' ? {
             companyName: formData.companyName,
             rcNumber: formData.rcNumber,
             officeAddress: formData.officeAddress,
-            industry: formData.industry,
-          } : undefined
+          } : undefined 
         };
 
     try {
@@ -62,30 +59,29 @@ export default function AuthPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Something went wrong');
+      if (!res.ok) throw new Error(data.message || 'Access Denied');
 
       if (isLogin) {
         if (data.user.status === 'pending') {
-          toast.error('Your account is pending approval. Our team will review and activate it shortly.', { id: authToast, duration: 6000 });
+          toast.error('Under Review: Your business profile is being audited by our admin.', { id: authToast, duration: 6000 });
           setLoading(false);
           return;
         }
 
-        toast.success('Welcome back!', { id: authToast });
+        toast.success(`Welcome back`, { id: authToast });
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
         setTimeout(() => {
           const role = data.user.role;
           const type = data.user.userType;
-
           if (role === 'admin') window.location.href = '/admin/dashboard';
           else if (type === 'employer') window.location.href = '/portal/employer';
-          else if (type === 'service') window.location.href = '/client/portal'; // FIX: was /portal/client
+          else if (type === 'service') window.location.href = '/client/portal';
           else window.location.href = '/recruitment';
-        }, 800);
+        }, 1000);
       } else {
-        toast.success('Account created! You can now sign in.', { id: authToast });
+        toast.success('Registration completed successfully!', { id: authToast });
         setIsLogin(true);
         setUserType(null);
       }
@@ -97,146 +93,121 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#060f1e] flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute w-[500px] h-[500px] bg-[#c8921e]/10 rounded-full blur-[120px] -top-40 -right-40 pointer-events-none" />
-      <div className="absolute w-[400px] h-[400px] bg-[#1a7a4a]/5 rounded-full blur-[100px] -bottom-20 -left-20 pointer-events-none" />
-
+    <div className="min-h-screen bg-gradient-to-br from-white via-green-50 to-blue-50 flex items-center justify-center p-6 font-sans">
+      
       <div className="relative w-full max-w-[500px]">
-
-        {/* Back to home */}
-        <Link href="/" className="flex items-center gap-2 text-white/30 hover:text-white text-sm mb-6 transition-all w-fit">
-          <ArrowLeft size={15}/> Back to home
+        <Link href="/" className="flex items-center gap-2 text-gray-400 hover:text-[#1a2e46] text-sm mb-6 transition-all group font-bold w-fit uppercase tracking-widest">
+          <ArrowLeft size={16} /> Main Website
         </Link>
 
-        <div className="bg-[#0b1f3a]/95 backdrop-blur-2xl border border-[#c8921e]/20 rounded-3xl p-10 shadow-2xl">
-
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-[#c8921e] rounded-xl flex items-center justify-center font-black text-[#0b1f3a] text-lg italic">O</div>
-              <span className="text-white font-serif font-bold text-xl italic uppercase">OBRUS APEX</span>
+        <div className="bg-white rounded-[40px] p-10 shadow-2xl border border-gray-100 relative overflow-hidden">
+          <div className="text-center mb-10">
+            <div className="flex justify-center items-center gap-4 mb-6">
+              <img src="/logo.png" alt="O" className="h-10 w-auto object-contain" 
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.innerHTML = '<div class="w-10 h-10 bg-[#257242] rounded-xl flex items-center justify-center text-white font-bold italic shadow-md">O</div>';
+                }} 
+              />
+              <div className="text-left border-l border-gray-200 pl-4">
+                 <h1 className="text-[#1a2e46] font-serif font-black text-2xl leading-none">OBRUS APEX</h1>
+                 <p className="text-[#257242] text-[10px] font-black uppercase tracking-widest mt-0.5">Unified Hub</p>
+              </div>
             </div>
-            <h2 className="font-serif text-2xl text-white font-bold tracking-tight mb-1">
-              {isLogin ? 'Sign In' : 'Create Account'}
+            
+            <h2 className="text-3xl font-extrabold text-[#1a2e46] tracking-tighter">
+              {isLogin ? 'Member Login' : 'Start Partnership'}
             </h2>
-            <p className="text-white/30 text-xs">
-              {isLogin ? 'Welcome back. Enter your credentials to continue.' : 'Join the OBRUS partner network.'}
+            <p className="text-gray-500 text-sm font-medium mt-1">
+              {isLogin ? 'Access your authorized dashboard' : 'Please identify your account path'}
             </p>
           </div>
 
-          {/* Registration — account type selection */}
           {!isLogin && !userType ? (
-            <div className="space-y-3 animate-in fade-in zoom-in-95 duration-300">
-              <p className="text-white/40 text-xs text-center uppercase tracking-widest font-bold mb-4">I am a...</p>
-              <PathCard ico={<Briefcase size={22}/>} title="Job Seeker" desc="Apply for verified industrial roles" onClick={() => setUserType('candidate')} />
-              <PathCard ico={<Building size={22}/>} title="Employer" desc="Post jobs and hire professionals" onClick={() => setUserType('employer')} />
-              <PathCard ico={<ClipboardList size={22}/>} title="Service Client" desc="Book HSE, environmental, or maintenance services" onClick={() => setUserType('service')} />
+            <div className="space-y-4 animate-in fade-in zoom-in-95 duration-500">
+               <PathCard ico={<Briefcase size={22}/>} title="Candidate" desc="I am looking for job vacancies" onClick={() => setUserType('candidate')} />
+               <PathCard ico={<Building size={22}/>} title="Employer" desc="Sourcing or outsourcing talent" onClick={() => setUserType('employer')} />
+               <PathCard ico={<ClipboardList size={22}/>} title="Services" desc="Booking HSE or facility solutions" onClick={() => setUserType('service')} />
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 animate-in slide-in-from-bottom-4 duration-300">
+            <form onSubmit={handleSubmit} className="space-y-4 animate-in slide-in-from-bottom-8">
               {!isLogin && (
-                <button type="button" onClick={() => setUserType(null)} className="flex items-center gap-2 text-[10px] font-bold uppercase text-[#c8921e] hover:underline tracking-widest mb-2">
-                  <ArrowLeft size={13}/> Change account type
+                <button type="button" onClick={() => setUserType(null)} className="text-[10px] font-black uppercase text-[#257242] hover:text-[#1a2e46] transition-colors flex items-center gap-2 mb-4 tracking-widest underline underline-offset-4 decoration-[#257242]/20">
+                  <ArrowLeft size={14}/> Back to paths
                 </button>
               )}
 
               {!isLogin && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="relative">
-                    <input required className="ai" placeholder="Full Name" onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                    <UserIcon className="ii" size={16}/>
+                    <input required className="input-field" placeholder="Full Name" onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                    <UserIcon className="input-icon" size={18}/>
                   </div>
                   <div className="relative">
-                    <input required className="ai" placeholder="Phone Number" onChange={(e) => setFormData({...formData, phone: e.target.value})} />
-                    <Phone className="ii" size={16}/>
+                    <input required className="input-field" placeholder="Phone Number" onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+                    <Phone className="input-icon" size={18}/>
                   </div>
                 </div>
               )}
 
               <div className="relative">
-                <input required type="email" className="ai" placeholder="Email Address" onChange={(e) => setFormData({...formData, email: e.target.value})} />
-                <Mail className="ii" size={16}/>
+                <input required type="email" className="input-field" placeholder="Email Address" onChange={(e) => setFormData({...formData, email: e.target.value})} />
+                <Mail className="input-icon" size={18}/>
               </div>
 
               {!isLogin && userType === 'employer' && (
-                <div className="space-y-3 pt-4 border-t border-white/5">
-                  <p className="text-[10px] font-bold text-[#c8921e] uppercase text-center tracking-widest">Company Details</p>
-                  <div className="relative">
-                    <input required className="ai" placeholder="Company Name" onChange={(e) => setFormData({...formData, companyName: e.target.value})} />
-                    <Building className="ii" size={16}/>
-                  </div>
-                  <div className="relative">
-                    <input required className="ai" placeholder="CAC RC Number" onChange={(e) => setFormData({...formData, rcNumber: e.target.value})} />
-                    <ShieldCheck className="ii" size={16}/>
-                  </div>
-                  <div className="relative">
-                    <textarea required className="ai h-20 py-4 resize-none" placeholder="Office Address" onChange={(e) => setFormData({...formData, officeAddress: e.target.value})} />
-                    <MapPin className="ii top-4" size={16}/>
-                  </div>
+                <div className="space-y-4 pt-4 border-t border-gray-100">
+                  <p className="text-[10px] font-black text-gray-300 text-center uppercase tracking-widest italic">Verification Data</p>
+                  <div className="relative"><input required className="input-field" placeholder="Organization Name" onChange={(e) => setFormData({...formData, companyName: e.target.value})} /><Building className="input-icon" size={18}/></div>
+                  <div className="relative"><input required className="input-field" placeholder="CAC RC Number" onChange={(e) => setFormData({...formData, rcNumber: e.target.value})} /><ShieldCheck className="input-icon" size={18}/></div>
+                  <div className="relative"><textarea required className="input-field h-24 py-4 resize-none" placeholder="Company Physical Address" onChange={(e) => setFormData({...formData, officeAddress: e.target.value})} /><MapPin className="input-icon top-5" size={18}/></div>
                 </div>
               )}
 
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center px-1">
-                  <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Password</label>
-                  {isLogin && (
-                    <Link href="/forgot-password" className="text-[10px] text-[#c8921e] font-bold uppercase hover:text-white transition-colors">
-                      Forgot password?
-                    </Link>
-                  )}
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Secured Key</label>
+                  {isLogin && <Link href="/forgot-password" size="sm" className="text-[10px] text-[#257242] font-black uppercase hover:text-[#1a2e46] transition-all">Recover ID?</Link>}
                 </div>
                 <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    className="ai"
-                    placeholder="••••••••"
+                  <input type={showPassword ? "text" : "password"} required className="input-field" placeholder="••••••••" 
                     onChange={(e) => {
                       setFormData({...formData, password: e.target.value});
                       if (!isLogin) checkStrength(e.target.value);
-                    }}
+                    }} 
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-white/20 hover:text-[#c8921e] transition-all">
-                    {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-gray-300 hover:text-[#257242] transition-colors">
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
-                  <Lock className="ii" size={16}/>
+                  <Lock className="input-icon" size={18}/>
                 </div>
-                {!isLogin && (
-                  <div className="flex gap-1.5 mt-2 px-1">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i < strength ? (strength <= 2 ? 'bg-amber-500' : 'bg-green-500') : 'bg-white/5'}`} />
-                    ))}
-                  </div>
-                )}
               </div>
 
-              <button
-                disabled={loading}
-                className="w-full mt-2 bg-gradient-to-r from-[#c8921e] to-[#e8b84b] text-[#0b1f3a] py-4 rounded-2xl font-bold text-sm uppercase tracking-widest hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-50"
-              >
-                {loading ? <Loader2 className="animate-spin mx-auto" size={18}/> : isLogin ? 'Sign In' : 'Create Account'}
+              <button disabled={loading} className="w-full mt-6 bg-[#1a2e46] text-white py-4.5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-xl hover:bg-[#257242] transform active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                {loading ? <Loader2 className="animate-spin" size={18} /> : isLogin ? 'Access Hub' : 'Register identity'}
               </button>
             </form>
           )}
 
-          {/* Toggle login/register */}
-          <div className="mt-8 text-center border-t border-white/5 pt-6">
-            <button
-              onClick={() => { setIsLogin(!isLogin); setUserType(null); }}
-              className="text-white/30 text-xs font-semibold tracking-widest uppercase transition-all hover:text-white"
-            >
-              {isLogin ? "Don't have an account? " : 'Already have an account? '}
-              <span className="text-[#c8921e] font-bold ml-1">{isLogin ? 'Sign Up' : 'Sign In'}</span>
+          <div className="mt-12 text-center border-t border-gray-50 pt-10">
+            <button onClick={() => { setIsLogin(!isLogin); setUserType(null); }} className="text-gray-400 text-[10px] font-bold tracking-widest uppercase transition-all hover:text-[#1a2e46]">
+              {isLogin ? "First mission here?" : "Authorized member?"} 
+              <span className="text-[#257242] font-black ml-4 bg-green-50 px-4 py-2 rounded-full border border-green-100 hover:bg-[#257242] hover:text-white transition-all italic">
+                {isLogin ? 'Sign Up' : 'Log In'}
+              </span>
             </button>
           </div>
         </div>
       </div>
 
       <style jsx>{`
-        .ai { width: 100%; background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 14px 18px 14px 46px; color: white; font-size: 14px; font-weight: 600; outline: none; transition: 0.3s; font-family: inherit; }
-        .ai:focus { border-color: #c8921e; background: rgba(255,255,255,0.06); }
-        .ai::placeholder { color: rgba(255,255,255,0.15); font-size: 13px; }
-        .ii { position: absolute; left: 15px; top: 16px; color: rgba(255,255,255,0.15); pointer-events: none; }
+        .input-field { 
+          width: 100%; background: #fdfdfd; border: 1.5px solid #efefef; border-radius: 18px; padding: 16px 20px 16px 52px; 
+          color: #1a2e46; font-size: 14px; font-weight: 700; outline: none; transition: 0.3s; 
+        }
+        .input-field:focus { border-color: #257242; box-shadow: 0 0 30px rgba(37, 114, 66, 0.04); }
+        .input-field::placeholder { color: #d1d1d1; text-transform: uppercase; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; }
+        .input-icon { position: absolute; left: 18px; top: 18px; color: #e5e5e5; }
       `}</style>
     </div>
   );
@@ -244,18 +215,15 @@ export default function AuthPage() {
 
 function PathCard({ ico, title, desc, onClick }: any) {
   return (
-    <button
-      onClick={onClick}
-      className="w-full group p-5 bg-white/[0.02] border border-white/10 rounded-2xl flex items-center justify-between hover:border-[#c8921e] hover:bg-[#c8921e]/5 transition-all text-left"
-    >
-      <div className="flex gap-4 items-center">
-        <div className="w-11 h-11 bg-[#0b1f3a] text-[#c8921e] rounded-xl flex items-center justify-center border border-white/5 group-hover:scale-105 transition-transform">{ico}</div>
+    <button onClick={onClick} className="w-full group p-8 bg-[#fdfdfd] border border-gray-100 rounded-[35px] flex items-center justify-between hover:border-[#257242] hover:shadow-2xl transition-all text-left">
+      <div className="flex gap-6 items-center">
+        <div className="w-16 h-16 bg-[#1a2e46] text-white rounded-3xl flex items-center justify-center shadow-lg border border-gray-100 transition-transform duration-500 group-hover:rotate-12 group-hover:bg-[#257242]">{ico}</div>
         <div>
-          <span className="block text-white font-bold text-base leading-none mb-1">{title}</span>
-          <span className="text-[11px] text-white/30 font-medium">{desc}</span>
+          <span className="block text-[#1a2e46] font-black text-xl uppercase tracking-tighter leading-none mb-1.5 italic">{title}</span>
+          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{desc}</span>
         </div>
       </div>
-      <ChevronRight className="text-white/10 group-hover:text-[#c8921e] transition-all shrink-0" size={20}/>
+      <ChevronRight className="text-gray-200 group-hover:text-[#257242] transition-all" size={24}/>
     </button>
   );
 }
