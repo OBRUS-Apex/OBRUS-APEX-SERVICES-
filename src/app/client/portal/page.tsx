@@ -3,13 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Home, ClipboardList, CreditCard, Bell,
-  Plus, X, Printer, LogOut, Upload, ShieldCheck, Download, Calendar, Menu
+  Plus, X, Printer, LogOut, Upload, ShieldCheck, Download, Calendar, Menu, Globe, ChevronRight, CheckCircle, Wallet
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 
-export default function ClientPortal() {
+export default function MasterClientPortal() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ export default function ClientPortal() {
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
   const [requestForm, setRequestForm] = useState({
-    location: '', priority: 'Normal Ops', targetDate: '', details: ''
+    location: '', priority: 'Normal', targetDate: '', details: ''
   });
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function ClientPortal() {
       setRequests(Array.isArray(reqData) ? reqData : []);
       setInvoices(Array.isArray(invData) ? invData : []);
     } catch {
-      toast.error('Failed to load your data. Please refresh.');
+      toast.error('Portal synchronization failure.');
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ export default function ClientPortal() {
 
   const handleRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const load = toast.loading('Submitting request...');
+    const load = toast.loading('Logging request...');
     try {
       const res = await fetch('/api/client/requests', {
         method: 'POST',
@@ -60,479 +60,298 @@ export default function ClientPortal() {
         body: JSON.stringify({ ...requestForm, userId: user._id, serviceType: selectedService })
       });
       if (res.ok) {
-        toast.success('Request submitted successfully', { id: load });
+        toast.success('Service request transmitted successfully', { id: load });
         setSelectedService(null);
         fetchData(user._id);
         setActiveTab('activity');
       } else {
-        const err = await res.json().catch(() => ({}));
-        toast.error(err.message || 'Failed to submit request', { id: load });
+        toast.error('Failed to submit mission parameters', { id: load });
       }
     } catch {
-      toast.error('Network error. Please try again.', { id: load });
+      toast.error('Connection failure.', { id: load });
     }
   };
 
   const handleReceiptUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!receiptFile) return toast.error('Please select a receipt file');
-    const load = toast.loading('Uploading payment proof...');
-    
+    if (!receiptFile) return toast.error('Selection required.');
+    const load = toast.loading('Uploading documentation...');
+
     try {
-      // 1. Upload the file to Supabase Storage Bucket ('receipts')
       const fileExt = receiptFile.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('receipts')
-        .upload(fileName, receiptFile);
+      const { error: uploadError } = await supabase.storage.from('receipts').upload(fileName, receiptFile);
 
-      if (uploadError) throw new Error('Failed to upload receipt to server.');
+      if (uploadError) throw new Error('Cloud transmission error.');
 
-      // 2. Get the public URL of the uploaded image
-      const { data: { publicUrl } } = supabase.storage
-        .from('receipts')
-        .getPublicUrl(fileName);
+      const { data: { publicUrl } } = supabase.storage.from('receipts').getPublicUrl(fileName);
 
-      // 3. Send the REAL URL to our API
       const res = await fetch('/api/client/invoices/reconcile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          invoiceId: selectedInvoice._id,
-          receiptUrl: publicUrl
-        })
+        body: JSON.stringify({ invoiceId: selectedInvoice._id, receiptUrl: publicUrl })
       });
 
       if (res.ok) {
-        toast.success('Payment proof submitted — pending admin review', { id: load });
+        toast.success('Payment evidence logged successfully', { id: load });
         setSelectedInvoice(null);
-        setReceiptFile(null); // Clear the selected file
+        setReceiptFile(null);
         fetchData(user._id);
-      } else {
-        toast.error('Upload failed. Please try again.', { id: load });
       }
     } catch (err: any) {
-      toast.error(err.message || 'Network error. Please try again.', { id: load });
+      toast.error(err.message || 'System error.', { id: load });
     }
   };
 
   const handleLogout = () => { localStorage.clear(); router.push('/auth'); };
 
   const totalUnpaid = Array.isArray(invoices)
-    ? invoices.filter(i => i.status === 'unpaid').reduce((acc, curr) => acc + curr.amount, 0)
+    ? invoices.filter(i => i.status === 'unpaid' || i.status === 'pending').reduce((acc, curr) => acc + curr.amount, 0)
     : 0;
 
-  const switchTab = (tab: string) => {
-    setActiveTab(tab);
-    setSidebarOpen(false);
-  };
-
   const tabTitles: Record<string, string> = {
-    overview: 'Overview',
-    engage: 'Book a Service',
-    billing: 'Invoices',
-    activity: 'My Requests',
+    overview: 'Hub Console', engage: 'Industrial Services', billing: 'Finance Registry', activity: 'Audit History',
   };
 
   if (loading) return (
-    <div className="h-screen bg-[#060f1e] flex flex-col items-center justify-center font-sans">
-      <div className="w-10 h-10 border-2 border-[#c8921e] border-t-transparent rounded-full animate-spin mb-4" />
-      <p className="text-white/30 font-semibold uppercase text-xs tracking-widest">Loading your portal...</p>
+    <div className="min-h-screen bg-[#112031] flex flex-col items-center justify-center font-sans text-white">
+      <div className="w-10 h-10 border-2 border-[#257242] border-t-transparent rounded-full animate-spin mb-4" />
+      <p className="font-black uppercase text-[9px] tracking-[0.4em] opacity-40 italic leading-none">Connecting User Terminal...</p>
     </div>
   );
 
   return (
-    <div className="flex min-h-screen bg-[#f5f0e8] text-[#0b1f3a] font-sans overflow-hidden">
-
-      {/* Mobile overlay */}
+    <div className="flex min-h-screen bg-[#f9fafb] text-[#1a2e46] font-sans overflow-hidden">
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-[90] md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* SIDEBAR */}
-      <aside
-        style={{ transform: sidebarOpen ? 'translateX(0)' : undefined }}
-        className="w-[260px] bg-[#060f1e] fixed inset-y-0 left-0 border-r border-white/5 z-[100] flex flex-col shadow-2xl -translate-x-full md:translate-x-0 transition-transform duration-300"
-      >
-        <div className="p-6 border-b border-white/5 flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#c8921e] rounded-xl flex items-center justify-center font-black text-[#0b1f3a] text-lg italic">O</div>
-          <div>
-            <span className="block text-white font-bold text-base leading-none">OBRUS</span>
-            <span className="text-[#e8b84b] text-[10px] uppercase tracking-widest opacity-60">Client Portal</span>
+      <aside style={{ transform: sidebarOpen ? 'translateX(0)' : undefined }} className="w-[280px] bg-[#112031] fixed inset-y-0 left-0 border-r border-white/5 z-[100] flex flex-col shadow-2xl -translate-x-full md:translate-x-0 transition-transform duration-500">
+        <div className="p-8 border-b border-white/5">
+          <div className="flex items-center gap-4 group">
+            <div className="bg-white rounded-2xl p-1.5 w-12 h-12 flex items-center justify-center shadow-lg transition-transform group-hover:rotate-12 duration-500">
+               <img src="/logo.png" alt="O" className="h-full w-full object-contain" />
+            </div>
+            <div className="text-white">
+               <h1 className="font-serif font-black text-xl italic tracking-tighter uppercase leading-none">Obrus</h1>
+               <p className="text-[#257242] text-[8px] font-black uppercase tracking-[0.3em] mt-1 leading-none italic">Services Portal</p>
+            </div>
           </div>
         </div>
 
-        <nav className="p-4 flex-1 space-y-1 mt-6">
-          <SidebarLink label="Overview" ico={<Home size={17}/>} active={activeTab === 'overview'} onClick={() => switchTab('overview')}/>
-          <SidebarLink label="Book a Service" ico={<Plus size={17}/>} active={activeTab === 'engage'} onClick={() => switchTab('engage')}/>
-          <SidebarLink label="Invoices" ico={<CreditCard size={17}/>} active={activeTab === 'billing'} onClick={() => switchTab('billing')}/>
-          <SidebarLink label="My Requests" ico={<ClipboardList size={17}/>} active={activeTab === 'activity'} onClick={() => switchTab('activity')}/>
+        <nav className="p-6 flex-1 space-y-1.5 mt-8 overflow-y-auto custom-scrollbar">
+           <SidebarLink label="Operation Center" ico={<Home size={17}/>} active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}/>
+           <SidebarLink label="Request Action" ico={<Plus size={17}/>} active={activeTab === 'engage'} onClick={() => setActiveTab('engage')}/>
+           <SidebarLink label="Billing Deck" ico={<CreditCard size={17}/>} active={activeTab === 'billing'} onClick={() => setActiveTab('billing')}/>
+           <SidebarLink label="Registry Logs" ico={<ClipboardList size={17}/>} active={activeTab === 'activity'} onClick={() => setActiveTab('activity')}/>
         </nav>
 
-        <div className="p-6 border-t border-white/5">
-          <button onClick={handleLogout} className="flex items-center gap-3 text-red-400/50 hover:text-red-400 font-semibold text-xs transition-all uppercase tracking-widest">
-            <LogOut size={15}/> Log Out
+        <div className="p-8 border-t border-white/5 bg-[#0a1521]">
+          <button onClick={handleLogout} className="flex items-center gap-4 text-red-400/40 hover:text-red-500 font-black text-[10px] uppercase tracking-[0.3em] transition-all">
+             <LogOut size={16}/> Revoke Credentials
           </button>
         </div>
       </aside>
 
-      {/* MAIN */}
-      <main className="md:ml-[260px] flex-1 flex flex-col min-h-screen overflow-y-auto custom-scrollbar">
-
-        {/* HEADER */}
-        <header className="h-[64px] bg-white border-b border-[rgba(11,31,58,0.06)] flex items-center justify-between px-5 md:px-10 sticky top-0 z-[50]">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-xl border border-[rgba(11,31,58,0.08)] text-[#0b1f3a]/40 hover:text-[#c8921e] hover:border-[#c8921e] transition-all">
-              <Menu size={19}/>
-            </button>
-            <h2 className="font-serif text-xl md:text-2xl font-bold text-[#0b1f3a] italic tracking-tight">
-              {tabTitles[activeTab]}
-            </h2>
+      <main className="md:ml-[280px] flex-1 flex flex-col min-h-screen overflow-y-auto custom-scrollbar no-print">
+        <header className="h-[80px] bg-white/80 backdrop-blur-xl border-b border-gray-100 flex items-center justify-between px-10 sticky top-0 z-[50]">
+          <div className="flex items-center gap-5">
+            <button onClick={() => setSidebarOpen(true)} className="md:hidden p-3 rounded-2xl bg-gray-50 text-navy transition-all"><Menu size={20}/></button>
+            <h2 className="font-serif text-3xl font-black uppercase tracking-tighter italic decoration-[#257242] underline underline-offset-[8px] decoration-4">{tabTitles[activeTab]} Node</h2>
           </div>
-          <div className="flex gap-3 items-center">
-            <div className="hidden sm:flex items-center gap-2 bg-[#f9f8f6] px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 border border-[rgba(11,31,58,0.06)]">
-              <Calendar size={12}/> {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-            </div>
-            <div className="w-9 h-9 rounded-xl bg-[#0b1f3a] flex items-center justify-center text-white hover:bg-[#c8921e] transition-all relative cursor-pointer">
-              <Bell size={16}/>
-              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
-            </div>
+          <div className="flex items-center gap-4">
+             <div className="hidden sm:flex items-center gap-2 bg-[#fcfbf9] px-6 py-2.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-slate-300 border leading-none italic"><Calendar size={12}/> {new Date().toDateString()}</div>
+             <Link href="/" className="w-12 h-12 bg-[#1a2e46] rounded-[18px] flex items-center justify-center text-[#c8921e] shadow-xl hover:rotate-12 transition-transform duration-500"><Globe size={18}/></Link>
           </div>
         </header>
 
-        <div className="p-5 md:p-10 pb-24 w-full max-w-[1200px] mx-auto">
-
-          {/* OVERVIEW */}
+        <div className="p-5 md:p-12 pb-32 max-w-[1400px] mx-auto w-full animate-in fade-in slide-in-from-bottom-5 duration-700">
           {activeTab === 'overview' && (
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-                <KpiCard label="Total Requests" val={requests?.length || 0} unit="All time" />
-                <KpiCard label="Outstanding Balance" val={totalUnpaid > 0 ? `₦${totalUnpaid.toLocaleString()}` : '₦0'} unit="Unpaid" />
-                <KpiCard label="Account Status" val="Active" unit="Verified" />
-                <KpiCard label="Staff Deployed" val="0" unit="Current" />
-              </div>
-
-              <div className="bg-[#0b1f3a] p-8 md:p-14 rounded-3xl text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-[#c8921e]/[0.04] rounded-bl-full pointer-events-none" />
-                <ShieldCheck className="absolute bottom-8 right-8 text-[#c8921e]/[0.06]" size={140}/>
-                <div className="relative z-10">
-                  <h3 className="font-serif text-2xl md:text-4xl font-bold mb-4 italic">Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}</h3>
-                  <p className="text-white/50 text-sm md:text-base leading-relaxed max-w-xl mb-8">
-                    Your portal is active. Book HSE Training, Waste Management, Procurement, and other services directly from here.
-                  </p>
-                  <button onClick={() => setActiveTab('engage')} className="bg-[#c8921e] text-[#0b1f3a] px-8 py-3.5 rounded-2xl font-bold text-sm uppercase tracking-wider hover:bg-[#e8b84b] transition-all">
-                    Book a Service →
-                  </button>
+             <div className="space-y-14">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                   <StatItem val={requests.length} label="Division Enquiries" theme="green" up={true}/>
+                   <StatItem val={`₦${totalUnpaid.toLocaleString()}`} label="Balance Hub" theme="gold" up={false}/>
+                   <StatItem val="AUTHORIZED" label="User Protocol" theme="green" up={true}/>
+                   <StatItem val="0%" label="Failure rate" theme="gold" up={true}/>
                 </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-[rgba(11,31,58,0.06)] overflow-hidden">
-                <div className="p-5 border-b border-[rgba(11,31,58,0.05)] flex items-center justify-between">
-                  <h3 className="font-semibold text-[#0b1f3a]">Recent Requests</h3>
-                  <button onClick={() => switchTab('activity')} className="text-xs font-semibold text-[#c8921e] hover:underline">View all →</button>
+                
+                <div className="bg-[#112031] p-16 rounded-[60px] text-white relative overflow-hidden shadow-3xl">
+                   <div className="absolute top-0 right-0 w-80 h-80 bg-[#257242]/[0.06] rounded-bl-[200px] animate-pulse"></div>
+                   <ShieldCheck className="absolute bottom-12 right-12 text-[#257242]/[0.06] -rotate-12" size={180}/>
+                   <h3 className="font-serif text-5xl font-black mb-6 tracking-tight">Access Granted</h3>
+                   <p className="text-white/40 text-xl font-light italic leading-relaxed max-w-xl border-l border-[#257242] pl-8">Corporate mission profile activated. Your credentials allow for direct engagement with Recruitment, Maintenance, and Safety division dispatchers.</p>
+                   <button onClick={() => setActiveTab('engage')} className="mt-14 bg-[#257242] text-white px-14 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-3xl shadow-green-900/40 transition-all hover:bg-green-700 transform hover:-translate-y-1">Establish New Mission</button>
                 </div>
-                {requests.length === 0 ? (
-                  <div className="p-10 text-center">
-                    <p className="text-slate-400 text-sm mb-4">No service requests yet.</p>
-                    <button onClick={() => switchTab('engage')} className="px-6 py-2.5 bg-[#c8921e] text-[#0b1f3a] rounded-xl text-sm font-bold hover:bg-[#e8b84b] transition-all">
-                      Book Your First Service
-                    </button>
-                  </div>
-                ) : (
-                  requests.slice(0, 3).map((r: any) => (
-                    <div key={r._id} className="flex items-center justify-between p-4 border-b border-[rgba(11,31,58,0.04)] last:border-0 hover:bg-[#f9f8f6] transition-all">
-                      <div>
-                        <p className="font-semibold text-sm text-[#0b1f3a]">{r.serviceType}</p>
-                        <p className="text-xs text-slate-400">{new Date(r.createdAt).toDateString()}</p>
-                      </div>
-                      <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${r.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-[#c8921e]/10 text-[#c8921e]'}`}>{r.status}</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </motion.div>
+             </div>
           )}
 
-          {/* BOOK A SERVICE */}
           {activeTab === 'engage' && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-              <p className="text-sm text-slate-500 mb-6">Select a service to submit a request.</p>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
-                {[
-                  { t: 'HSE Training', d: 'Safety certifications for your team.', i: '🛡️', b: 'border-[#0b1f3a]' },
-                  { t: 'Pest Control', d: 'Fumigation and pest management.', i: '🧪', b: 'border-[#c8921e]' },
-                  { t: 'Waste Management', d: 'Scheduled refuse evacuation.', i: '♻️', b: 'border-green-600' },
-                  { t: 'Procurement', d: 'Industrial equipment and supplies.', i: '📦', b: 'border-[#c8921e]' },
-                  { t: 'Janitorial', d: 'Cleaning and facility maintenance.', i: '🧹', b: 'border-[#0b1f3a]' },
-                  { t: 'Consultancy', d: 'Custom advisory and planning.', i: '💡', b: 'border-[#c8921e]' }
-                ].map((svc) => (
-                  <div
-                    key={svc.t}
-                    onClick={() => setSelectedService(svc.t)}
-                    className={`bg-white p-5 md:p-8 rounded-2xl border-t-4 ${svc.b} border border-[rgba(11,31,58,0.05)] shadow-sm hover:shadow-lg hover:-translate-y-1 cursor-pointer transition-all group`}
-                  >
-                    <div className="text-3xl md:text-4xl mb-4 group-hover:scale-110 transition-transform">{svc.i}</div>
-                    <h3 className="font-bold text-base md:text-lg text-[#0b1f3a] mb-1 group-hover:text-[#c8921e] transition-colors">{svc.t}</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed hidden md:block">{svc.d}</p>
+            <div className="grid md:grid-cols-3 gap-8">
+               {[
+                  { t: 'Recruitment & Hire', d: 'Workforce strategy and staff nodes.', i: '👥', c: 'text-emerald-500', bg: 'bg-emerald-50/40' },
+                  { t: 'Safety (HSE)', d: 'Industrial standard compliance audit.', i: '🛡️', c: 'text-[#1a2e46]', bg: 'bg-[#1a2e46]/5' },
+                  { t: 'Facility Ops', d: 'Comprehensive maintenance mission.', i: '🏗️', c: 'text-green-700', bg: 'bg-green-50' },
+                  { t: 'Pest Control', d: 'Fumigation and specialized chemical.', i: '🧪', c: 'text-amber-600', bg: 'bg-amber-50' },
+                  { t: 'Logistics / Waste', d: 'Refuse evacuation & environmental ops.', i: '♻️', c: 'text-[#257242]', bg: 'bg-[#257242]/5' },
+                  { t: 'Consultancy', d: 'Bespoke strategic operational hub.', i: '💡', c: 'text-[#c8921e]', bg: 'bg-gold-50/50' }
+               ].map((s) => (
+                  <div key={s.t} onClick={() => setSelectedService(s.t)} className="bg-white p-12 rounded-[55px] border border-gray-100 shadow-xl transition-all hover:-translate-y-3 cursor-pointer group hover:border-[#257242]">
+                     <div className="text-5xl mb-8 transition-transform duration-700 group-hover:scale-110">{s.i}</div>
+                     <h4 className="font-serif text-2xl font-black text-navy uppercase italic mb-3 tracking-tighter decoration-[#257242]/20 group-hover:underline underline-offset-4 decoration-4">{s.t}</h4>
+                     <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.25em]">{s.d}</p>
+                     <div className={`mt-8 h-1 w-0 group-hover:w-full transition-all duration-1000 ${s.bg} rounded-full`}></div>
                   </div>
-                ))}
-              </div>
-            </motion.div>
+               ))}
+            </div>
           )}
 
-          {/* INVOICES */}
           {activeTab === 'billing' && (
-            <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-[rgba(11,31,58,0.06)]">
-              <div className="p-5 md:p-8 bg-[#f9f8f6] border-b border-[rgba(11,31,58,0.05)] flex justify-between items-center">
-                <h3 className="font-serif text-xl font-bold italic text-[#0b1f3a]">Your Invoices</h3>
-                <CreditCard className="text-[#c8921e]/30" size={28}/>
-              </div>
-              <div className="overflow-x-auto">
-                <p className="text-[10px] font-semibold text-slate-400 px-5 pt-3 md:hidden">← Scroll to see more</p>
-                <table className="w-full text-left min-w-[480px]">
-                  <thead className="bg-[#0b1f3a] text-[#e8b84b] uppercase">
-                    <tr>
-                      <th className="p-4 md:p-6 text-[10px] font-bold tracking-widest">Invoice #</th>
-                      <th className="p-4 md:p-6 text-[10px] font-bold tracking-widest">Service</th>
-                      <th className="p-4 md:p-6 text-[10px] font-bold tracking-widest">Amount</th>
-                      <th className="p-4 md:p-6 text-[10px] font-bold tracking-widest">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#f0ede6]">
-                    {invoices.length === 0 ? (
-                      <tr><td colSpan={4} className="p-16 text-center text-slate-400 text-sm">No invoices yet.</td></tr>
-                    ) : (
-                      invoices.map((inv: any) => (
-                        <tr key={inv._id} className="hover:bg-[#f9f8f6] transition-all">
-                          <td className="p-4 md:p-6 font-mono text-sm font-bold text-[#0b1f3a]">{inv.invoiceNumber || 'INV-001'}</td>
-                          <td className="p-4 md:p-6 font-serif font-bold text-[#0b1f3a] italic">{inv.serviceType}</td>
-                          <td className="p-4 md:p-6 font-bold text-[#0b1f3a]">₦{inv.amount?.toLocaleString()}</td>
-                          <td className="p-4 md:p-6">
-                            {inv.status === 'unpaid' ? (
-                              <button onClick={() => setSelectedInvoice(inv)} className="bg-[#0b1f3a] text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#c8921e] transition-all active:scale-95">
-                                Pay Now
-                              </button>
-                            ) : (
-                              <span className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${
-                                inv.status === 'paid' ? 'bg-green-50 text-green-600' :
-                                inv.status === 'verifying' ? 'bg-blue-50 text-blue-500' :
-                                'bg-[#c8921e]/10 text-[#c8921e]'
-                              }`}>
-                                {inv.status}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+            <div className="bg-white rounded-[60px] shadow-3xl border border-gray-100 overflow-hidden">
+               <div className="p-12 border-b border-gray-50 flex items-center justify-between">
+                  <h3 className="font-serif text-4xl font-bold text-[#1a2e46] italic uppercase">Financial Ledger</h3>
+                  <Wallet size={40} className="text-[#257242]/30"/>
+               </div>
+               <div className="overflow-x-auto">
+                 <table className="w-full text-left">
+                    <thead className="bg-[#1a2e46] text-white">
+                      <tr>
+                        <th className="p-9 text-[11px] font-black uppercase tracking-[0.3em] italic">Mission Identifer</th>
+                        <th className="p-9 text-[11px] font-black uppercase tracking-[0.3em] italic">Description</th>
+                        <th className="p-9 text-[11px] font-black uppercase tracking-[0.3em] italic text-right">Sum (NGN)</th>
+                        <th className="p-9 text-[11px] font-black uppercase tracking-[0.3em] italic text-center">Authorization Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {invoices.length === 0 ? (
+                        <tr><td colSpan={4} className="p-24 text-center font-black text-slate-300 text-xs uppercase tracking-[0.4em] italic opacity-50">Archive Registry is empty</td></tr>
+                      ) : (
+                        invoices.map((inv) => (
+                           <tr key={inv._id} className="hover:bg-green-50 transition-colors">
+                              <td className="p-9 font-mono font-black text-[#1a2e46] opacity-60">AUDIT-{inv._id.substring(0,8).toUpperCase()}</td>
+                              <td className="p-9 font-serif font-black text-2xl text-navy italic">{inv.serviceType}</td>
+                              <td className="p-9 text-right font-black text-xl tracking-tighter">₦{inv.amount.toLocaleString()}</td>
+                              <td className="p-9 text-center">
+                                {inv.status === 'unpaid' || inv.status === 'pending' ? (
+                                  <button onClick={() => setSelectedInvoice(inv)} className="bg-[#257242] text-white px-8 py-3 rounded-2xl font-black text-[9px] uppercase tracking-[0.3em] shadow-lg transition-all active:scale-90 hover:shadow-[#257242]/20 hover:-translate-y-1">Audit node & pay</button>
+                                ) : (
+                                  <div className="inline-flex items-center gap-3 bg-green-50 text-[#257242] px-6 py-2 rounded-full border border-green-200">
+                                    <span className="text-[10px] font-black uppercase tracking-widest">{inv.status}</span><CheckCircle size={12}/>
+                                  </div>
+                                )}
+                              </td>
+                           </tr>
+                        ))
+                      )}
+                    </tbody>
+                 </table>
+               </div>
             </div>
           )}
 
-          {/* MY REQUESTS */}
           {activeTab === 'activity' && (
-            <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-[rgba(11,31,58,0.06)]">
-              <div className="p-5 md:p-8 bg-[#f9f8f6] border-b border-[rgba(11,31,58,0.05)] flex justify-between items-center">
-                <h3 className="font-serif text-xl font-bold italic text-[#0b1f3a]">My Service Requests</h3>
-                <button onClick={() => switchTab('engage')} className="text-xs font-semibold text-[#c8921e] hover:underline">+ New request</button>
-              </div>
-              <div className="overflow-x-auto">
-                {requests.length > 0 && <p className="text-[10px] font-semibold text-slate-400 px-5 pt-3 md:hidden">← Scroll to see more</p>}
-                <table className="w-full text-left min-w-[480px]">
-                  <thead className="bg-[#0b1f3a] text-[#e8b84b] uppercase">
+             <div className="bg-white rounded-[60px] border border-gray-100 shadow-3xl overflow-hidden">
+                <table className="w-full text-left">
+                  <thead className="bg-[#1a2e46] text-[#c8921e]">
                     <tr>
-                      <th className="p-4 md:p-6 text-[10px] font-bold tracking-widest">ID</th>
-                      <th className="p-4 md:p-6 text-[10px] font-bold tracking-widest">Service</th>
-                      <th className="p-4 md:p-6 text-[10px] font-bold tracking-widest">Date</th>
-                      <th className="p-4 md:p-6 text-[10px] font-bold tracking-widest">Status</th>
+                      <th className="p-9 text-[10px] font-black uppercase tracking-[0.4em] italic">Identity Key</th>
+                      <th className="p-9 text-[10px] font-black uppercase tracking-[0.4em] italic">Mission Title</th>
+                      <th className="p-9 text-[10px] font-black uppercase tracking-[0.4em] italic">Registry Date</th>
+                      <th className="p-9 text-[10px] font-black uppercase tracking-[0.4em] italic text-right">Flow Phase</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#f0ede6]">
-                    {requests.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="p-16 text-center">
-                          <p className="text-slate-400 text-sm mb-4">You have no service requests yet.</p>
-                          <button onClick={() => switchTab('engage')} className="px-6 py-2.5 bg-[#c8921e] text-[#0b1f3a] rounded-xl text-sm font-bold hover:bg-[#0b1f3a] hover:text-white transition-all">
-                            Book Your First Service
-                          </button>
-                        </td>
+                  <tbody className="divide-y divide-gray-50">
+                    {requests.map((r) => (
+                      <tr key={r._id} className="hover:bg-green-50 transition-colors">
+                        <td className="p-9 text-slate-300 font-mono font-bold">X72-{r._id.slice(-6).toUpperCase()}</td>
+                        <td className="p-9 font-serif font-black text-3xl italic text-[#1a2e46] leading-none decoration-[#257242]/20 underline decoration-4 underline-offset-4">{r.serviceType}</td>
+                        <td className="p-9 text-xs font-black uppercase text-slate-400 tracking-[0.25em]">{new Date(r.createdAt).toDateString()}</td>
+                        <td className="p-9 text-right"><span className={`px-5 py-2 rounded-full font-black text-[10px] uppercase tracking-widest ${r.status==='completed'?'bg-green-50 text-[#257242]':'bg-amber-50 text-gold shadow-inner animate-pulse'}`}>{r.status} NODE</span></td>
                       </tr>
-                    ) : (
-                      requests.map((r: any) => (
-                        <tr key={r._id} className="hover:bg-[#f9f8f6] transition-colors">
-                          <td className="p-4 md:p-6 font-mono text-xs text-[#0b1f3a]/50">{r._id?.substring(0, 10) || r._id}</td>
-                          <td className="p-4 md:p-6 font-serif font-bold text-[#0b1f3a] italic">{r.serviceType}</td>
-                          <td className="p-4 md:p-6 text-xs font-semibold text-slate-400">{new Date(r.createdAt).toDateString()}</td>
-                          <td className="p-4 md:p-6">
-                            <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full ${r.status === 'completed' ? 'bg-green-500' : 'bg-[#c8921e]'}`} />
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-[#0b1f3a]">{r.status}</span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                    ))}
                   </tbody>
                 </table>
-              </div>
-            </div>
+             </div>
           )}
         </div>
       </main>
 
-      {/* SERVICE REQUEST MODAL */}
       <AnimatePresence>
         {selectedService && (
-          <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-[#060f1e]/90 backdrop-blur-xl">
-            <motion.div
-              initial={{ y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 40, opacity: 0 }}
-              className="bg-white w-full sm:max-w-xl rounded-t-3xl sm:rounded-3xl p-7 md:p-10 shadow-2xl relative overflow-y-auto max-h-[92vh] custom-scrollbar"
-            >
-              <button onClick={() => setSelectedService(null)} className="absolute top-5 right-5 bg-[#f0ede6] p-2.5 rounded-full hover:bg-[#c8921e] hover:text-white transition-all">
-                <X size={18}/>
-              </button>
-              <h3 className="font-serif text-2xl md:text-3xl font-bold italic text-[#0b1f3a] mb-1">New Request</h3>
-              <p className="text-[#c8921e] text-xs font-bold uppercase tracking-widest mb-8 border-l-4 border-[#c8921e] pl-4">{selectedService}</p>
-
-              <form onSubmit={handleRequestSubmit} className="space-y-5">
-                <div className="grid sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="field-label">Service Location *</label>
-                    <input required className="field-input" placeholder="Address or area" onChange={e => setRequestForm({...requestForm, location: e.target.value})}/>
-                  </div>
-                  <div>
-                    <label className="field-label">Priority Level</label>
-                    <select className="field-input" onChange={e => setRequestForm({...requestForm, priority: e.target.value})}>
-                      <option value="Normal Ops">Normal</option>
-                      <option value="High Priority">High Priority</option>
-                      <option value="Urgent Dispatch">Urgent</option>
-                    </select>
-                  </div>
+          <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-[#060f1e]/98 backdrop-blur-xl no-print">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white w-full max-w-4xl rounded-[80px] p-24 shadow-2xl relative max-h-[92vh] overflow-y-auto border border-[#257242]/10 custom-scrollbar">
+              <button onClick={() => setSelectedService(null)} className="absolute top-16 right-16 p-5 bg-gray-50 rounded-full hover:bg-navy hover:text-white transition-all shadow-xl"><X size={32}/></button>
+              <h3 className="font-serif text-7xl font-bold tracking-tighter uppercase italic text-[#1a2e46]">Mission Hub</h3>
+              <p className="text-[10px] font-black text-[#257242] uppercase tracking-[0.6em] border-l-[10px] border-[#257242] pl-8 mb-20">{selectedService} Channel Request</p>
+              
+              <form onSubmit={handleRequestSubmit} className="space-y-12">
+                <div className="grid md:grid-cols-2 gap-10">
+                   <div className="space-y-4"><label className="lb-st">Registry address</label><input required className="input-hub" placeholder="Operations HQ Location" onChange={e => setRequestForm({...requestForm, location: e.target.value})}/></div>
+                   <div className="space-y-4"><label className="lb-st">Vetting tier</label>
+                      <select className="input-hub cursor-pointer font-black" onChange={e => setRequestForm({...requestForm, priority: e.target.value})}><option>Standard Node</option><option>Executive Node</option><option>Crisis Ops</option></select>
+                   </div>
                 </div>
-                <div>
-                  <label className="field-label">Preferred Date *</label>
-                  <input type="date" required className="field-input" onChange={e => setRequestForm({...requestForm, targetDate: e.target.value})}/>
-                </div>
-                <div>
-                  <label className="field-label">Details & Requirements *</label>
-                  <textarea
-                    className="field-input h-32 py-4 resize-none"
-                    required
-                    placeholder="Describe the job scope, number of staff needed, equipment, or any special requirements..."
-                    onChange={e => setRequestForm({...requestForm, details: e.target.value})}
-                  />
-                </div>
-                <button type="submit" className="w-full bg-[#0b1f3a] text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-widest hover:bg-[#c8921e] hover:text-[#0b1f3a] transition-all active:scale-95">
-                  Submit Request
-                </button>
+                <div className="space-y-4"><label className="lb-st">Authorized Mission timeline</label><input type="date" required className="input-hub" onChange={e => setRequestForm({...requestForm, targetDate: e.target.value})}/></div>
+                <div className="space-y-4"><label className="lb-st">Brief details and tactical description</label><textarea className="input-hub h-48 py-8 resize-none leading-relaxed italic" required placeholder="Outline tactical deliverables, headcount, or technical compliance required for this deployment brief..." onChange={e => setRequestForm({...requestForm, details: e.target.value})}/></div>
+                <button type="submit" className="w-full py-8 bg-[#1a2e46] text-white rounded-[45px] font-black text-xs uppercase tracking-[0.8em] shadow-3xl hover:bg-[#257242] active:scale-95 transition-all">Submit for Industrial Clearance</button>
               </form>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* INVOICE MODAL */}
       <AnimatePresence>
         {selectedInvoice && (
-          <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-[#060f1e]/90 backdrop-blur-xl">
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 50, opacity: 0 }}
-              className="bg-white w-full sm:max-w-4xl rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden max-h-[92vh]"
-            >
-              <div id="invoice-printable" className="flex-1 p-7 md:p-14 overflow-y-auto">
-                <div className="flex justify-between items-start mb-10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-[#0b1f3a] text-[#c8921e] rounded-2xl flex items-center justify-center font-black text-2xl italic">O</div>
-                    <div>
-                      <h4 className="font-serif text-2xl font-bold text-[#0b1f3a] uppercase">OBRUS APEX</h4>
-                      <p className="text-[10px] uppercase font-bold tracking-widest text-[#c8921e]">Services Division</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Invoice</p>
-                    <span className="text-xl font-mono font-bold text-[#0b1f3a]">{selectedInvoice.invoiceNumber || 'INV-001'}</span>
-                  </div>
+          <div className="fixed inset-0 z-[2000] flex items-center justify-center p-0 md:p-6 bg-navy-deep/98 backdrop-blur-2xl no-print overflow-y-auto">
+             <motion.div initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white w-full max-w-6xl rounded-none md:rounded-[100px] flex flex-col md:flex-row shadow-2xl relative overflow-hidden h-full max-h-screen border border-gray-100">
+                <div id="invoice-printable" className="flex-1 p-10 md:p-28 overflow-y-auto bg-white">
+                   <div className="flex justify-between items-start mb-24">
+                      <div className="flex items-center gap-6">
+                        <img src="/logo.png" className="h-16 w-auto" alt="Logo" />
+                        <div className="h-14 w-0.5 bg-navy/[0.08] mx-2"></div>
+                        <h4 className="font-serif font-black text-4xl text-[#1a2e46] tracking-tighter leading-none italic underline decoration-green-600 decoration-8 underline-offset-[-2px]">Official HUB Doc</h4>
+                      </div>
+                      <div className="text-right"><p className="text-[10px] font-black uppercase text-slate-300 tracking-widest italic leading-none mb-4">Certified Transaction node</p><span className="text-3xl font-mono font-black text-navy">{selectedInvoice.invoiceNumber || 'NODE-REG-ID'}</span></div>
+                   </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-24 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-20 leading-loose pt-12 border-t">
+                      <div><span className="text-[#257242] block mb-3 text-sm italic decoration-[#257242] decoration-4 underline">AUTHORIZED ISSUER</span>OBRUS APEX SERVICES LTD<br/>Port Harcourt Sector HQ<br/>Niger-Delta Command Operations</div>
+                      <div><span className="text-[#257242] block mb-3 text-sm italic decoration-[#257242] decoration-4 underline">CLIENT RECIPIENT NODE</span>{user?.name}<br/>Registry Mail: {user?.email}</div>
+                   </div>
+                   <div className="border-y-8 border-navy py-20 flex flex-col md:flex-row justify-between items-end gap-10">
+                      <div><p className="text-emerald-700 font-black text-[10px] uppercase tracking-[0.3em] mb-4 italic">Description Tier</p><h5 className="font-serif text-5xl font-black italic text-[#1a2e46] leading-none tracking-tight">{selectedInvoice.serviceType}</h5></div>
+                      <h5 className="text-7xl font-black text-navy tracking-tighter italic leading-none">₦{selectedInvoice.amount?.toLocaleString()}</h5>
+                   </div>
+                   <div className="mt-20 p-12 bg-[#f9fafb] rounded-[55px] text-center text-xs font-black uppercase tracking-[0.15em] text-[#1a2e46]/30 leading-loose border-2 border-dashed">Transaction Hub: Zenith Command Hub · ID 102XXXXXXXXX<br/>Upload evidence in terminal link below for registry update.</div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-10 text-xs font-semibold text-slate-500 mb-10 border-t pt-6 border-[rgba(11,31,58,0.05)] uppercase tracking-widest leading-loose">
-                  <div>
-                    <span className="text-[#c8921e] text-[10px] block mb-2 font-bold">From</span>
-                    <b className="text-[#0b1f3a]">OBRUS Apex Integrated Services Ltd</b><br/>
-                    Port Harcourt, Rivers State
-                  </div>
-                  <div>
-                    <span className="text-[#c8921e] text-[10px] block mb-2 font-bold">To</span>
-                    <b className="text-[#0b1f3a]">{user?.name}</b><br/>
-                    {user?.email}
-                  </div>
+                <div className="w-full md:w-[440px] bg-[#1a2e46] p-12 md:p-24 flex flex-col justify-center border-l border-white/5 relative shadow-inner no-print">
+                   <button onClick={() => setSelectedInvoice(null)} className="absolute top-12 right-12 p-5 bg-white shadow-xl rounded-[20px] text-navy hover:bg-[#257242] hover:text-white transition-all transform hover:-rotate-180 duration-700"><X size={30}/></button>
+                   <div className="relative mb-14"><ShieldCheck className="text-[#257242]/30 mb-8" size={60}/><h3 className="font-serif text-4xl text-white font-bold leading-tight uppercase italic decoration-[#257242] underline decoration-4 underline-offset-8">Verify Transaction</h3></div>
+                   <form onSubmit={handleReceiptUpload} className="space-y-8">
+                      <div className="relative group cursor-pointer h-[260px]">
+                        <input type="file" required className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange={e => setReceiptFile(e.target.files?.[0] || null)} />
+                        <div className="h-full w-full bg-white/[0.04] border-4 border-dashed rounded-[45px] border-white/5 flex flex-col items-center justify-center text-center p-8 group-hover:border-[#257242] group-hover:bg-white/[0.06] transition-all duration-700 relative shadow-2xl">
+                           <Upload size={38} className="text-[#c8921e] opacity-20 mb-6 group-hover:opacity-100 group-hover:scale-125 transition-all duration-700" />
+                           <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] leading-relaxed group-hover:text-white transition-colors">{receiptFile ? receiptFile.name : 'Vett identity by receipt upload'}</p>
+                        </div>
+                      </div>
+                      <button type="submit" className="w-full py-6 bg-[#257242] text-white rounded-3xl font-black text-xs uppercase tracking-[0.3em] shadow-3xl hover:bg-green-700 transition-all hover:scale-105 active:scale-95 shadow-green-500/30">Commit Payment Link</button>
+                   </form>
+                   <div className="mt-14 space-y-4">
+                      <button onClick={() => window.print()} className="w-full py-5 border border-white/10 rounded-2xl flex items-center justify-center gap-4 text-[10px] font-bold uppercase tracking-[0.25em] text-white hover:bg-white/5 transition-all leading-none italic"><Printer size={15}/> Print Hardcopy Node</button>
+                   </div>
                 </div>
-
-                <div className="border-y-2 border-[#0b1f3a] py-8 mb-10 flex justify-between items-end">
-                  <div>
-                    <p className="text-[#c8921e] font-bold text-[10px] uppercase tracking-widest mb-2">Service</p>
-                    <h5 className="font-serif text-2xl font-bold italic text-[#0b1f3a]">{selectedInvoice.serviceType}</h5>
-                  </div>
-                  <h5 className="text-3xl font-bold text-[#0b1f3a]">₦{selectedInvoice.amount?.toLocaleString()}</h5>
-                </div>
-
-                <div className="p-5 bg-[#f9f8f6] rounded-2xl border border-dashed border-[rgba(11,31,58,0.1)] text-center text-xs font-semibold text-slate-400 leading-loose">
-                  Payment: Account 102XXXXXXXXX — Zenith Bank<br/>
-                  Upload your transfer receipt in the panel to confirm payment.
-                </div>
-              </div>
-
-              <div className="w-full md:w-[340px] bg-[#f0ede6] p-7 md:p-12 flex flex-col border-t md:border-t-0 md:border-l border-[rgba(11,31,58,0.05)]">
-                <button onClick={() => setSelectedInvoice(null)} className="ml-auto mb-8 bg-white p-2.5 rounded-full shadow text-[#0b1f3a] hover:rotate-90 transition-all duration-500">
-                  <X size={18}/>
-                </button>
-                <h3 className="font-serif text-xl font-bold italic text-[#0b1f3a] mb-2">Confirm Payment</h3>
-                <p className="text-slate-500 text-xs leading-relaxed mb-8">Transfer the amount to the account above, then upload your receipt below.</p>
-
-                <form onSubmit={handleReceiptUpload} className="space-y-5 flex-1">
-                  <div className="relative group cursor-pointer">
-                    <input type="file" required className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={(e) => setReceiptFile(e.target.files?.[0] || null)} />
-                    <div className="w-full py-10 bg-white border-2 border-dashed rounded-2xl border-[rgba(11,31,58,0.1)] flex flex-col items-center justify-center text-center group-hover:border-[#c8921e] transition-all">
-                      <Upload size={24} className="text-[#c8921e] opacity-30 mb-3 group-hover:opacity-100 transition-opacity"/>
-                      <p className="text-xs font-semibold text-slate-400">{receiptFile ? receiptFile.name : 'Upload receipt / screenshot'}</p>
-                    </div>
-                  </div>
-                  <button type="submit" className="w-full py-3.5 bg-[#0b1f3a] text-white rounded-2xl font-bold text-sm hover:bg-[#c8921e] hover:text-[#0b1f3a] transition-all active:scale-95">
-                    Submit Payment Proof
-                  </button>
-                </form>
-
-                <div className="pt-6 flex flex-col gap-3 mt-auto">
-                  <button onClick={() => window.print()} className="w-full py-3 bg-white text-[#0b1f3a] rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-[#0b1f3a] hover:text-white transition-all shadow">
-                    <Printer size={15}/> Print Invoice
-                  </button>
-                  <button className="w-full py-3 bg-[#c8921e] text-[#0b1f3a] rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:shadow-lg transition-all">
-                    <Download size={15}/> Download PDF
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
       <style jsx>{`
-        @media print {
-          aside, header { display: none !important; }
-          main { margin-left: 0 !important; }
-          #invoice-printable { position: fixed; inset: 0; background: white; padding: 40px; z-index: 9999; }
-        }
-        .field-input { width: 100%; background: #f9f8f6; border: 1.5px solid rgba(11,31,58,0.06); padding: 14px 18px; border-radius: 16px; font-size: 14px; font-weight: 600; color: #0b1f3a; outline: none; transition: 0.3s; font-family: inherit; }
-        .field-input:focus { border-color: #c8921e; background: white; box-shadow: 0 4px 20px rgba(200,146,30,0.08); }
-        .field-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: rgba(11,31,58,0.35); margin-left: 4px; letter-spacing: 0.2em; display: block; margin-bottom: 6px; }
+        .input-hub { width: 100%; background: #fdfdfd; border: 1.5px solid #efefef; border-radius: 22px; padding: 22px 28px; color: #112031; font-size: 15px; font-weight: 700; outline: none; transition: 0.3s; }
+        .input-hub:focus { border-color: #257242; box-shadow: 0 12px 30px rgba(0,0,0,0.05); }
+        .lb-st { font-size: 10px; font-weight: 900; text-transform: uppercase; color: rgba(37, 114, 66, 0.2); margin-left: 20px; letter-spacing: 0.3em; display: block; margin-bottom: 6px; italic; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(200,146,30,0.2); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(37, 114, 66, 0.2); border-radius: 10px; }
+        @media print { .no-print { display: none !important; } #invoice-printable { position: fixed; inset: 0; background: white; z-index: 10000; padding: 40px !important; } h2, h3, h4, h5, p, span { color: black !important; } }
       `}</style>
     </div>
   );
@@ -540,24 +359,22 @@ export default function ClientPortal() {
 
 function SidebarLink({ label, ico, active, onClick }: any) {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all font-bold text-xs uppercase tracking-widest ${active ? 'bg-[#c8921e]/15 text-[#e8b84b] border-l-4 border-[#c8921e]' : 'text-white/25 hover:text-white hover:bg-white/5 border-l-4 border-transparent'}`}
-    >
-      <span className={active ? 'text-[#c8921e]' : 'opacity-30'}>{ico}</span>
-      <span>{label}</span>
+    <button onClick={onClick} className={`w-full flex items-center gap-5 p-5 rounded-[22px] transition-all font-black text-[10px] uppercase tracking-[0.3em] border-r-4 italic ${active ? 'bg-[#257242]/10 text-emerald-400 border-[#257242] shadow-xl translate-x-2' : 'text-white/20 border-transparent hover:text-white hover:bg-white/5'}`}>
+       <span className={active ? 'text-emerald-400' : 'opacity-10'}>{ico}</span>
+       <span>{label}</span>
     </button>
   );
 }
 
-function KpiCard({ label, val, unit }: any) {
+function StatItem({ val, label, theme, up }: any) {
+  const styles: any = { green: "border-[#257242]/20 text-[#1a2e46]", gold: "border-[#c8921e]/20 text-[#112031]" };
   return (
-    <div className="p-4 md:p-6 bg-white rounded-2xl border border-[rgba(11,31,58,0.06)] shadow-sm hover:shadow-md hover:border-[#c8921e]/30 transition-all">
-      <div className="flex justify-between items-start mb-2">
-        <h4 className="text-xl md:text-3xl font-serif font-bold text-[#0b1f3a] italic truncate max-w-[70%]">{val}</h4>
-        <span className="text-[9px] font-bold bg-[#c8921e]/10 text-[#c8921e] px-2 py-0.5 rounded-full tracking-tight shrink-0">{unit}</span>
-      </div>
-      <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">{label}</span>
+    <div className={`p-8 bg-white rounded-[45px] border shadow-2xl transition-all duration-700 hover:-translate-y-3 group hover:border-[#257242] ${styles[theme]}`}>
+       <div className="flex justify-between items-start mb-2 italic">
+          <h4 className="text-4xl font-serif font-black underline decoration-[#257242]/20">{val}</h4>
+          <span className={`text-[9px] font-black ${up?'text-[#257242] animate-pulse':'text-gold'} px-3 py-1 rounded-full uppercase leading-none shadow-inner`}>{up ? 'HIGH-ACTIVE' : 'AUDIT-MODE'}</span>
+       </div>
+       <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-300 ml-1 leading-none">{label}</p>
     </div>
   );
 }
