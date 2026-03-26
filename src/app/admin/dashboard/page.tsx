@@ -137,7 +137,7 @@ export default function AdminDashboard() {
 
       {sidebarOpen && <div className="fixed inset-0 bg-black/70 z-[90] md:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      {/* SIDEBAR - Updated to Brand Navy */}
+    
       <aside
         style={{ transform: sidebarOpen ? 'translateX(0)' : undefined }}
         className="w-[260px] bg-[#112031] fixed inset-y-0 left-0 border-r border-white/5 z-[100] flex flex-col shadow-2xl -translate-x-full md:translate-x-0 transition-transform duration-300"
