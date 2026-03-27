@@ -5,7 +5,7 @@ import {
   Globe, Mail, Phone, Calendar,
   Briefcase, FileText, CheckCircle, XCircle,
   ClipboardList, AlertTriangle, Trash2, RefreshCw,
-  Menu, X, Users, MapPin, EyeOff, Eye, TrendingUp
+  Menu, X, Users, MapPin, EyeOff, Eye, TrendingUp, Search
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
