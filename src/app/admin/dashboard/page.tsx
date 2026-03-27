@@ -245,7 +245,7 @@ export default function AdminDashboard() {
              </div>
           )}
 
-          {/* ADDITIONAL VIEWS WOULD FOLLOW HERE (HSE, SERVICES, JOBS) USING THE SAME BRAND COLOR SCHEME */}
+          
 
         </div>
       </main>
