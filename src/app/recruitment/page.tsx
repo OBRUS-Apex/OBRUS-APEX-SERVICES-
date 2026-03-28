@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {
   Briefcase, MapPin, DollarSign, Plus, X, Send,
   FileText, CheckCircle, Users, ChevronRight,
-  Search, Filter, Clock, Building2, Upload, Phone, User, Mail
+  Search, Filter, Clock, Building2, Upload, Phone, User, Mail, Loader2, ArrowRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -20,10 +20,9 @@ export default function RecruitmentPage() {
   const [applyModal, setApplyModal] = useState(false);
   const [user, setUser] = useState<any>(null);
 
-  // Employer state
   const [postModal, setPostModal] = useState(false);
   const [myJobs, setMyJobs] = useState<any[]>([]);
-  const [selectedMyJob, setSelectedMyJob] = useState<any>(null);
+  const [selectedMyJobId, setSelectedMyJobId] = useState<string | null>(null);
   const [applicants, setApplicants] = useState<any[]>([]);
 
   const [applyForm, setApplyForm] = useState({ name: '', phone: '', email: '', cvUrl: '' });
@@ -67,7 +66,7 @@ export default function RecruitmentPage() {
   }, [tab, user]);
 
   const fetchApplicants = async (jobId: string) => {
-    setSelectedMyJob(jobId);
+    setSelectedMyJobId(jobId);
     const res = await fetch(`/api/applications?jobId=${jobId}`);
     const data = await res.json();
     setApplicants(Array.isArray(data) ? data : []);
@@ -145,255 +144,199 @@ export default function RecruitmentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8] font-sans">
-
-      {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(6,10,20,0.96)] backdrop-blur border-b border-[rgba(200,146,30,0.16)]">
-        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#c8921e] rounded flex items-center justify-center font-black text-[#0b1f3a] text-lg italic">O</div>
-            <div>
-              <span className="block text-white font-bold text-sm leading-none">OBRUS</span>
-              <span className="text-[#e8b84b] text-[9px] uppercase tracking-widest">Apex Services</span>
+    <div className="min-h-screen bg-[#f5f0e8] font-sans text-[#1a2e46]">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#1a2e46] border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-4 group">
+            <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-105">
+              <img src="/logo.png" alt="O" className="h-8 w-auto object-contain" />
+            </div>
+            <div className="text-white">
+              <span className="block font-serif font-black text-xl leading-none tracking-tighter uppercase italic">OBRUS APEX</span>
+              <span className="text-[#257242] text-[9px] font-black uppercase tracking-widest">Recruitment Hub</span>
             </div>
           </Link>
-          <div className="hidden md:flex items-center gap-1">
-            {[['/', 'Home'], ['/recruitment', 'Recruitment'], ['/environmental', 'Environmental'], ['/equipment', 'Equipment'], ['/hse', 'HSE']].map(([href, label]) => (
-              <Link key={href} href={href} className={`px-3 py-1.5 rounded text-sm transition-all ${href === '/recruitment' ? 'bg-[rgba(200,146,30,0.15)] text-[#e8b84b]' : 'text-white/60 hover:text-[#e8b84b] hover:bg-[rgba(200,146,30,0.1)]'}`}>{label}</Link>
+          <div className="hidden md:flex items-center gap-8">
+            {[['/', 'Home'], ['/recruitment', 'Careers'], ['/hse', 'Safety'], ['/environmental', 'Environmental']].map(([href, label]) => (
+              <Link key={href} href={href} className={`text-[10px] font-black uppercase tracking-widest transition-all ${href === '/recruitment' ? 'text-[#257242]' : 'text-white/40 hover:text-white'}`}>{label}</Link>
             ))}
-            <Link href="/auth" className="ml-2 px-4 py-1.5 border border-white/20 rounded text-sm text-white/70 hover:text-white transition-all">Login</Link>
+            <Link href="/auth" className="px-6 py-2 bg-[#257242] text-white rounded-full font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-green-700 transition-all">Portal Access</Link>
           </div>
         </div>
       </nav>
 
-      {/* HERO */}
-      <section className="pt-28 pb-14 px-5 bg-gradient-to-br from-[#060f1e] to-[#0b1f3a] relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[radial-gradient(circle,rgba(200,146,30,0.1),transparent_68%)] pointer-events-none" />
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="inline-flex items-center gap-2 bg-[rgba(200,146,30,0.12)] border border-[rgba(200,146,30,0.25)] rounded-full px-4 py-1.5 text-xs text-[#e8b84b] uppercase tracking-widest mb-4">💼 Recruitment Division</div>
-          <h1 className="font-serif text-4xl md:text-6xl font-bold text-white leading-tight mb-4">Find Your Next<br/><span className="text-[#e8b84b]">Industrial Role</span></h1>
-          <p className="text-white/50 text-base leading-relaxed max-w-xl mb-8">Browse verified job listings across HSE, Technical, Environmental, and Recruitment divisions. Apply directly and get matched by OBRUS.</p>
+      <section className="pt-32 pb-20 px-6 bg-[#1a2e46] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#257242]/10 rounded-full blur-[120px] -mr-40 -mt-40" />
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 rounded-full px-5 py-2 text-[10px] font-black text-[#257242] uppercase tracking-[0.3em] mb-6 italic">
+            <div className="w-2 h-2 bg-[#257242] rounded-full animate-pulse" /> Industrial Placement Node
+          </div>
+          <h1 className="font-serif text-5xl md:text-7xl font-black text-white leading-none tracking-tighter mb-6 italic">
+            Strategic <span className="text-[#257242]">Workforce</span><br/>Acquisition.
+          </h1>
+          <p className="text-white/40 text-lg max-w-2xl mb-12 font-medium leading-relaxed italic">Vetted technical personnel and HSE specialists for high-stakes operations. Browse vacancies or establish a corporate hiring brief.</p>
 
-          {/* Tab switcher */}
-          <div className="flex gap-3">
-            <button onClick={() => setTab('seeker')} className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all ${tab === 'seeker' ? 'bg-[#c8921e] text-[#0b1f3a]' : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'}`}>
-              👤 Job Seekers
+          <div className="flex gap-4">
+            <button onClick={() => setTab('seeker')} className={`px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-2xl ${tab === 'seeker' ? 'bg-[#257242] text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}>
+              Candidate Search
             </button>
-            <a href="https://obrus-apex-servicess.pxxl.click/portal/employer" className="flex items-center px-6 py-3 rounded-2xl font-bold text-sm transition-all bg-white/10 text-white/60 hover:bg-white/20 hover:text-white">
-              🏢 Employers
-            </a>
+            <button onClick={() => setTab('employer')} className={`px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-2xl ${tab === 'employer' ? 'bg-[#257242] text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}>
+              Employer Console
+            </button>
           </div>
         </div>
       </section>
 
-      {/* ── JOB SEEKER VIEW ── */}
       {tab === 'seeker' && (
-        <div className="max-w-6xl mx-auto px-5 py-10">
-
-          {/* Search + filter bar */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="max-w-7xl mx-auto px-6 py-16 animate-in fade-in duration-700">
+          <div className="flex flex-col lg:flex-row gap-6 mb-12">
             <div className="relative flex-1">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" />
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search job title or location..."
-                className="w-full bg-white border border-[rgba(11,31,58,0.08)] rounded-2xl pl-10 pr-4 py-3.5 text-sm font-medium text-[#0b1f3a] outline-none focus:border-[#c8921e] shadow-sm"
+                placeholder="Search by role, location or keyword..."
+                className="w-full bg-white border border-gray-100 rounded-[25px] pl-14 pr-6 py-5 text-sm font-bold text-[#1a2e46] outline-none focus:border-[#257242] shadow-xl"
               />
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-3 flex-wrap items-center">
               {CATEGORIES.map(cat => (
-                <button key={cat} onClick={() => setCatFilter(cat)} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${catFilter === cat ? 'bg-[#0b1f3a] text-white border-[#0b1f3a]' : 'bg-white text-slate-500 border-[rgba(11,31,58,0.08)] hover:border-[#c8921e] hover:text-[#c8921e]'}`}>
+                <button key={cat} onClick={() => setCatFilter(cat)} className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border-2 ${catFilter === cat ? 'bg-[#1a2e46] text-white border-[#1a2e46] shadow-lg' : 'bg-white text-gray-400 border-gray-50 hover:border-[#257242]'}`}>
                   {cat}
                 </button>
               ))}
             </div>
           </div>
 
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">{filteredJobs.length} positions available</p>
-
-          {loading ? (
-            <div className="py-32 text-center">
-              <div className="w-10 h-10 border-2 border-[#c8921e] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Loading jobs...</p>
-            </div>
-          ) : filteredJobs.length === 0 ? (
-            <div className="py-32 text-center bg-white rounded-3xl border border-[rgba(11,31,58,0.06)]">
-              <Briefcase size={48} className="mx-auto mb-4 text-slate-200" />
-              <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">No jobs found</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredJobs.map((job: any) => (
-                <div key={job._id} className="bg-white rounded-3xl border border-[rgba(11,31,58,0.06)] p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer" onClick={() => setSelectedJob(job)}>
-                  {/* Category badge */}
-                  <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border mb-4 inline-block ${catColors[job.category] || 'bg-slate-50 text-slate-500 border-slate-200'}`}>
-                    {job.category}
-                  </span>
-
-                  {/* Title */}
-                  <h3 className="font-serif text-xl font-bold text-[#0b1f3a] mb-3 leading-snug group-hover:text-[#c8921e] transition-colors">{job.title}</h3>
-
-                  {/* Meta */}
-                  <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-400 mb-5">
-                    <span className="flex items-center gap-1.5"><MapPin size={13} className="text-[#c8921e]"/> {job.location || 'Nigeria'}</span>
-                    {job.salary && job.salary !== 'Negotiable' && (
-  <span className="flex items-center gap-1.5"><DollarSign size={13} className="text-[#c8921e]"/> {job.salary}</span>
-)}
-                    <span className="flex items-center gap-1.5"><Clock size={13}/> {new Date(job.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
-                  </div>
-
-                  {/* Description preview */}
-                  <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 mb-5">{job.description}</p>
-
-                  <button className="w-full py-3 bg-[#0b1f3a] text-white rounded-2xl text-xs font-bold uppercase tracking-widest group-hover:bg-[#c8921e] transition-all">
-                    Apply Now →
-                  </button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {filteredJobs.map((job: any) => (
+              <div key={job._id} className="bg-white rounded-[50px] border border-gray-100 p-10 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all group relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#257242]/5 rounded-bl-full group-hover:scale-110 transition-transform duration-700" />
+                <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border mb-6 inline-block ${catColors[job.category] || 'bg-gray-50 text-gray-400 border-gray-100'}`}>
+                  {job.category}
+                </span>
+                <h3 className="font-serif text-4xl font-bold text-[#1a2e46] mb-4 tracking-tighter italic group-hover:underline decoration-[#257242] decoration-4 underline-offset-8 transition-all">{job.title}</h3>
+                <div className="flex flex-wrap gap-8 text-[11px] font-black uppercase text-gray-300 mb-8 italic">
+                  <span className="flex items-center gap-2"><MapPin size={14} className="text-[#257242]"/> {job.location}</span>
+                  <span className="flex items-center gap-2"><DollarSign size={14} className="text-[#257242]"/> Competitive Comp.</span>
                 </div>
-              ))}
-            </div>
-          )}
+                <button onClick={() => setSelectedJob(job)} className="w-full py-4 bg-[#1a2e46] text-white rounded-[22px] font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-[#257242] transition-all flex items-center justify-center gap-3">
+                  Audit Details <ArrowRight size={14}/>
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* ── EMPLOYER VIEW ── */}
       {tab === 'employer' && (
-        <div className="max-w-6xl mx-auto px-5 py-10">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div className="max-w-7xl mx-auto px-6 py-16 animate-in fade-in duration-700">
+          <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-16 border-b pb-12 border-gray-100">
             <div>
-              <h2 className="font-serif text-3xl font-bold text-[#0b1f3a] italic tracking-tighter">{user?.employerProfile?.companyName || 'Your Company'}</h2>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">{myJobs.length} active listing{myJobs.length !== 1 ? 's' : ''}</p>
+              <h2 className="font-serif text-5xl font-black text-[#1a2e46] italic tracking-tighter uppercase leading-none mb-3">{user?.employerProfile?.companyName || 'Corporate Registry'}</h2>
+              <p className="text-[10px] font-black text-[#257242] uppercase tracking-[0.4em] italic">Active Recruitment Node: {myJobs.length} Briefs</p>
             </div>
-            <button onClick={() => setPostModal(true)} className="flex items-center gap-2 bg-[#0b1f3a] text-white px-6 py-3.5 rounded-2xl font-bold text-sm hover:bg-[#c8921e] transition-all shadow-lg shrink-0">
-              <Plus size={18}/> Post a Job
+            <button onClick={() => setPostModal(true)} className="bg-[#1a2e46] text-white px-10 py-5 rounded-[25px] font-black text-xs uppercase tracking-widest shadow-3xl hover:bg-[#257242] transition-all flex items-center gap-4 group">
+              <Plus size={20} className="group-hover:rotate-90 transition-transform duration-500"/> New Mission Brief
             </button>
           </div>
 
-          {myJobs.length === 0 ? (
-            <div className="py-32 text-center bg-white rounded-3xl border border-dashed border-[rgba(11,31,58,0.1)]">
-              <Briefcase size={48} className="mx-auto mb-4 text-slate-200" />
-              <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-6">No jobs posted yet</p>
-              <button onClick={() => setPostModal(true)} className="px-8 py-3 bg-[#c8921e] text-[#0b1f3a] rounded-2xl font-bold text-sm">Post Your First Job</button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid lg:grid-cols-12 gap-12">
+            <div className="lg:col-span-7 space-y-6">
               {myJobs.map((job: any) => (
-                <div key={job._id} onClick={() => fetchApplicants(job._id)} className={`bg-white rounded-3xl border p-6 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 ${selectedMyJob === job._id ? 'border-[#c8921e] shadow-lg' : 'border-[rgba(11,31,58,0.06)] shadow-sm'}`}>
-                  <div className="flex items-start justify-between mb-4">
-                    <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border ${catColors[job.category] || 'bg-slate-50 text-slate-500 border-slate-200'}`}>{job.category}</span>
-                    <div className="w-9 h-9 bg-[#f0ede6] rounded-xl flex items-center justify-center text-[#0b1f3a] hover:bg-[#c8921e] hover:text-white transition-all">
-                      <ChevronRight size={16}/>
-                    </div>
-                  </div>
-                  <h3 className="font-serif text-xl font-bold text-[#0b1f3a] mb-3 leading-snug">{job.title}</h3>
-                  <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-400">
-                    <span className="flex items-center gap-1.5"><MapPin size={13} className="text-[#c8921e]"/> {job.location}</span>
-                    <span className="flex items-center gap-1.5"><Clock size={13}/> {new Date(job.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                <div key={job._id} onClick={() => fetchApplicants(job._id)} className={`bg-white p-10 rounded-[50px] border cursor-pointer transition-all hover:shadow-2xl relative overflow-hidden ${selectedMyJobId === job._id ? 'border-[#257242] shadow-3xl' : 'border-gray-100 shadow-sm'}`}>
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-[#257242]/5 rounded-bl-full" />
+                  <span className="text-[9px] font-black uppercase tracking-widest px-4 py-1.5 bg-[#1a2e46] text-white rounded-full mb-4 inline-block shadow-lg italic">{job.category}</span>
+                  <h3 className="font-serif text-3xl font-bold text-[#1a2e46] mb-4 italic tracking-tighter">{job.title}</h3>
+                  <div className="flex gap-8 text-[10px] font-black uppercase text-gray-300 italic">
+                    <span className="flex items-center gap-2"><MapPin size={14} className="text-[#257242]"/> {job.location}</span>
+                    <span className="flex items-center gap-2"><Clock size={14} className="text-[#257242]"/> {new Date(job.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               ))}
             </div>
-          )}
 
-          {/* Applicants panel */}
-          {selectedMyJob && applicants.length > 0 && (
-            <div className="mt-8 bg-white rounded-3xl border border-[rgba(11,31,58,0.06)] overflow-hidden shadow-sm">
-              <div className="p-6 border-b border-[rgba(11,31,58,0.05)] flex items-center justify-between">
-                <h3 className="font-serif text-xl font-bold text-[#0b1f3a] italic">Applicants ({applicants.length})</h3>
-                <button onClick={() => { setSelectedMyJob(null); setApplicants([]); }} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all"><X size={16}/></button>
-              </div>
-              <div className="divide-y divide-[rgba(11,31,58,0.04)]">
-                {applicants.map((app: any) => (
-                  <div key={app._id} className="p-5 flex items-center justify-between gap-4 hover:bg-[#fcfbf9] transition-all">
-                    <div>
-                      <p className="font-bold text-[#0b1f3a]">{app.candidateId?.name || 'Candidate'}</p>
-                      <p className="text-xs text-slate-400">{app.candidateId?.email}</p>
+            <div className="lg:col-span-5 bg-white rounded-[60px] p-12 border border-gray-100 shadow-3xl sticky top-28 h-fit min-h-[500px]">
+              <h3 className="font-serif text-3xl font-black italic mb-2 tracking-tighter">Vetting Pool</h3>
+              <p className="text-[10px] font-black uppercase text-[#257242] tracking-[0.2em] mb-10 italic border-b pb-6">Approved Professional Matches</p>
+              
+              {applicants.length > 0 ? (
+                <div className="space-y-6">
+                  {applicants.map((app: any) => (
+                    <div key={app._id} className="p-8 bg-[#fcfbf9] rounded-[40px] border border-[#257242]/10 shadow-sm hover:shadow-xl transition-all group">
+                      <div className="flex justify-between items-start mb-6">
+                        <div>
+                          <p className="font-black text-2xl tracking-tighter uppercase text-[#1a2e46] italic leading-none mb-1">{app.candidateId?.name}</p>
+                          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Security Cleared ✓</span>
+                        </div>
+                        <CheckCircle className="text-[#257242]" size={24}/>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 mb-8">
+                        <a href={app.cvUrl} target="_blank" className="flex items-center justify-center p-3 bg-white rounded-2xl border border-gray-100 hover:border-[#257242] transition-all text-[10px] font-black uppercase tracking-widest">Audit CV</a>
+                        <div className="flex items-center justify-center p-3 bg-white rounded-2xl border border-gray-100 text-[10px] font-black uppercase tracking-widest opacity-20 italic">Verified</div>
+                      </div>
+                      <button className="w-full py-4 bg-[#1a2e46] text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-[#257242] transition-all">Dispatch Offer</button>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${app.status === 'vetted' ? 'bg-green-50 text-green-600' : app.status === 'offered' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'}`}>{app.status}</span>
-                      {app.cvUrl && (
-                        <a href={app.cvUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-4 py-2 bg-[#f0ede6] rounded-xl text-xs font-bold text-[#0b1f3a] hover:bg-[#c8921e] hover:text-white transition-all">
-                          <FileText size={13}/> CV
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-32 text-center text-gray-200">
+                  <Users size={60} className="mx-auto mb-6 opacity-5" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] leading-loose opacity-40">Select an active brief to view <br/> OBRUS-vetted candidates</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
 
-      {/* ── JOB DETAIL + APPLY MODAL ── */}
       {selectedJob && (
-        <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-[#060f1e]/90 backdrop-blur-xl">
-          <div className="bg-white w-full sm:max-w-2xl rounded-t-[40px] sm:rounded-[40px] shadow-2xl max-h-[92vh] overflow-y-auto">
-            <div className="p-6 sm:p-10">
-              {/* Header */}
-              <div className="flex items-start justify-between mb-6">
-                <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border ${catColors[selectedJob.category] || ''}`}>{selectedJob.category}</span>
-                <button onClick={() => setSelectedJob(null)} className="p-2.5 bg-[#f0ede6] rounded-full hover:bg-[#c8921e] hover:text-white transition-all"><X size={18}/></button>
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-[#060f1e]/98 backdrop-blur-xl overflow-y-auto">
+          <div className="bg-white w-full max-w-4xl rounded-[70px] shadow-3xl relative my-auto border border-white/10 animate-in zoom-in-95 duration-500 overflow-hidden">
+            <div className="p-12 md:p-20 max-h-[90vh] overflow-y-auto custom-scrollbar">
+              <div className="flex items-start justify-between mb-10">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] px-5 py-2 bg-[#1a2e46] text-white rounded-full shadow-lg italic">{selectedJob.category}</span>
+                <button onClick={() => { setSelectedJob(null); setApplyModal(false); }} className="p-4 bg-gray-50 rounded-full hover:bg-red-50 hover:text-red-500 transition-all shadow-xl"><X size={24}/></button>
               </div>
 
-              <h2 className="font-serif text-3xl font-bold text-[#0b1f3a] mb-2 leading-tight">{selectedJob.title}</h2>
-              <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-400 mb-6">
-                <span className="flex items-center gap-1.5"><MapPin size={13} className="text-[#c8921e]"/> {selectedJob.location}</span>
-                {selectedJob.salaryRange?.min > 0 && (
-                  <span className="flex items-center gap-1.5"><DollarSign size={13} className="text-[#c8921e]"/> ₦{selectedJob.salaryRange.min.toLocaleString()} – ₦{selectedJob.salaryRange.max.toLocaleString()}/mo</span>
-                )}
+              <h2 className="font-serif text-6xl font-bold text-[#1a2e46] mb-4 tracking-tighter italic leading-none">{selectedJob.title}</h2>
+              <div className="flex flex-wrap gap-10 text-[11px] font-black uppercase text-gray-300 mb-12 italic border-b pb-8 border-gray-50">
+                <span className="flex items-center gap-3"><MapPin size={16} className="text-[#257242]"/> {selectedJob.location}</span>
+                <span className="flex items-center gap-3"><DollarSign size={16} className="text-[#257242]"/> Authorized Compensation Hub</span>
               </div>
 
-              <div className="space-y-5 mb-8">
+              <div className="space-y-10 mb-16">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[#c8921e] mb-2">About the Role</p>
-                  <p className="text-sm text-slate-600 leading-relaxed">{selectedJob.description}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#257242] mb-4 italic">Mission Parameters</p>
+                  <p className="text-lg text-gray-500 leading-relaxed font-medium italic">"{selectedJob.description}"</p>
                 </div>
                 {selectedJob.requirements && (
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-[#c8921e] mb-2">Requirements</p>
-                    <p className="text-sm text-slate-600 leading-relaxed">{selectedJob.requirements}</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#257242] mb-4 italic">Technical Requirements</p>
+                    <p className="text-lg text-gray-500 leading-relaxed font-medium italic">"{selectedJob.requirements}"</p>
                   </div>
                 )}
               </div>
 
               {!applyModal ? (
-                <button onClick={() => setApplyModal(true)} className="w-full py-4 bg-[#0b1f3a] text-white rounded-2xl font-bold uppercase tracking-widest text-sm hover:bg-[#c8921e] transition-all">
-                  Apply for this Role →
+                <button onClick={() => setApplyModal(true)} className="w-full py-6 bg-[#1a2e46] text-white rounded-[35px] font-black uppercase tracking-[0.5em] text-xs shadow-3xl hover:bg-[#257242] transition-all transform hover:scale-[1.02] active:scale-95">
+                  Secure Identity for Vetting →
                 </button>
               ) : (
-                <form onSubmit={handleApply} className="space-y-4 border-t border-[rgba(11,31,58,0.06)] pt-6">
-                  <p className="font-serif text-xl font-bold text-[#0b1f3a] mb-4">Your Application</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="relative">
-                      <User size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-                      <input required value={applyForm.name} onChange={e => setApplyForm({...applyForm, name: e.target.value})} className="w-full bg-[#f5f0e8] border border-[rgba(11,31,58,0.06)] rounded-2xl pl-10 pr-4 py-3.5 text-sm font-medium outline-none focus:border-[#c8921e]" placeholder="Full Name *"/>
-                    </div>
-                    <div className="relative">
-                      <Phone size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-                      <input required value={applyForm.phone} onChange={e => setApplyForm({...applyForm, phone: e.target.value})} className="w-full bg-[#f5f0e8] border border-[rgba(11,31,58,0.06)] rounded-2xl pl-10 pr-4 py-3.5 text-sm font-medium outline-none focus:border-[#c8921e]" placeholder="Phone Number *"/>
-                    </div>
+                <form onSubmit={handleApply} className="space-y-6 animate-in slide-in-from-bottom-10 duration-700">
+                  <h3 className="font-serif text-3xl font-bold text-[#1a2e46] mb-8 italic underline decoration-[#257242] decoration-4 underline-offset-8">Application Registry</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <input required value={applyForm.name} className="fts" placeholder="Legal Full Identity" readOnly />
+                    <input required value={applyForm.phone} className="fts" placeholder="Mobile Node" readOnly />
                   </div>
-                  <div className="relative">
-                    <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-                    <input value={applyForm.email} onChange={e => setApplyForm({...applyForm, email: e.target.value})} className="w-full bg-[#f5f0e8] border border-[rgba(11,31,58,0.06)] rounded-2xl pl-10 pr-4 py-3.5 text-sm font-medium outline-none focus:border-[#c8921e]" placeholder="Email Address"/>
+                  <input value={applyForm.email} className="fts" placeholder="Network Address (Email)" readOnly />
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[#257242] ml-6">Digital CV Link (Drive/Dropbox)</label>
+                    <input required value={applyForm.cvUrl} onChange={e => setApplyForm({...applyForm, cvUrl: e.target.value})} className="fts" placeholder="https://drive.google.com/file/..." />
                   </div>
-                  <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 ml-1">CV / Resume Link *</label>
-                    <input
-                      required
-                      value={applyForm.cvUrl}
-                      onChange={e => setApplyForm({...applyForm, cvUrl: e.target.value})}
-                      className="w-full bg-[#f5f0e8] border border-[rgba(11,31,58,0.06)] rounded-2xl px-4 py-3.5 text-sm font-medium outline-none focus:border-[#c8921e]"
-                      placeholder="Paste Google Drive / Dropbox CV link"
-                    />
-                    <p className="text-[10px] text-slate-400 mt-1 ml-1">Upload your CV to Google Drive and paste the shareable link here</p>
-                  </div>
-                  <div className="flex gap-3 pt-2">
-                    <button type="button" onClick={() => setApplyModal(false)} className="flex-1 py-3.5 border border-[rgba(11,31,58,0.1)] rounded-2xl font-bold text-sm text-slate-500 hover:bg-slate-50 transition-all">Cancel</button>
-                    <button type="submit" className="flex-1 py-3.5 bg-[#c8921e] text-[#0b1f3a] rounded-2xl font-bold text-sm hover:bg-[#0b1f3a] hover:text-white transition-all flex items-center justify-center gap-2">
-                      <Send size={16}/> Submit Application
-                    </button>
+                  <div className="flex gap-4 pt-6">
+                    <button type="button" onClick={() => setApplyModal(false)} className="px-10 py-5 border-2 border-gray-100 rounded-[25px] font-black text-[10px] uppercase tracking-widest text-gray-300 hover:bg-gray-50 transition-all">Abort</button>
+                    <button type="submit" className="flex-1 py-5 bg-[#257242] text-white rounded-[25px] font-black text-[10px] uppercase tracking-[0.4em] shadow-2xl hover:bg-[#1a2e46] transition-all">Submit for Industrial Audit</button>
                   </div>
                 </form>
               )}
@@ -402,80 +345,57 @@ export default function RecruitmentPage() {
         </div>
       )}
 
-      {/* ── POST JOB MODAL ── */}
       {postModal && (
-        <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-[#060f1e]/90 backdrop-blur-xl">
-          <div className="bg-white w-full sm:max-w-2xl rounded-t-[40px] sm:rounded-[40px] shadow-2xl max-h-[92vh] overflow-y-auto">
-            <form onSubmit={handlePostJob} className="p-6 sm:p-10">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-serif text-3xl font-bold text-[#0b1f3a] italic">Post a Job</h2>
-                <button type="button" onClick={() => setPostModal(false)} className="p-2.5 bg-[#f0ede6] rounded-full hover:bg-[#c8921e] hover:text-white transition-all"><X size={18}/></button>
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-[#060f1e]/98 backdrop-blur-xl overflow-y-auto">
+          <div className="bg-white w-full max-w-4xl rounded-[80px] p-16 md:p-24 shadow-3xl relative my-auto border border-white/10 animate-in slide-in-from-bottom-10 duration-700">
+            <form onSubmit={handlePostJob} className="space-y-10">
+              <div className="flex items-center justify-between mb-10">
+                <h2 className="font-serif text-6xl font-black text-[#1a2e46] italic tracking-tighter uppercase leading-none">New brief</h2>
+                <button type="button" onClick={() => setPostModal(false)} className="p-4 bg-gray-50 rounded-full hover:bg-[#257242] hover:text-white transition-all shadow-xl"><X size={28}/></button>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 ml-1">Job Title *</label>
-                  <input
-                    required
-                    value={jobForm.title}
-                    onChange={e => setJobForm({...jobForm, title: e.target.value})}
-                    className="w-full bg-[#f5f0e8] border border-[rgba(11,31,58,0.06)] rounded-2xl px-5 py-3.5 text-sm font-medium outline-none focus:border-[#c8921e]"
-                    placeholder="e.g. Lead HSE Supervisor, Site Engineer..."
-                  />
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                   <div className="space-y-2"><label className="lbs">Position Identification</label><input required value={jobForm.title} onChange={e => setJobForm({...jobForm, title: e.target.value})} className="fts" placeholder="Role Name" /></div>
+                   <div className="space-y-2"><label className="lbs">Deployment node</label><input required value={jobForm.location} onChange={e => setJobForm({...jobForm, location: e.target.value})} className="fts" placeholder="Site / Region" /></div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 ml-1">Category *</label>
-                    <select required value={jobForm.category} onChange={e => setJobForm({...jobForm, category: e.target.value})} className="w-full bg-[#f5f0e8] border border-[rgba(11,31,58,0.06)] rounded-2xl px-5 py-3.5 text-sm font-medium outline-none focus:border-[#c8921e]">
-                      <option>HSE Consultancy</option>
-                      <option>Technical</option>
-                      <option>Recruitment</option>
-                      <option>Environmental</option>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-2"><label className="lbs">Specialism Tier</label>
+                    <select required value={jobForm.category} onChange={e => setJobForm({...jobForm, category: e.target.value})} className="fts font-black italic cursor-pointer">
+                      <option>HSE Consultancy</option><option>Technical</option><option>Recruitment</option><option>Environmental</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 ml-1">Location *</label>
-                    <input required value={jobForm.location} onChange={e => setJobForm({...jobForm, location: e.target.value})} className="w-full bg-[#f5f0e8] border border-[rgba(11,31,58,0.06)] rounded-2xl px-5 py-3.5 text-sm font-medium outline-none focus:border-[#c8921e]" placeholder="e.g. Port Harcourt, Lagos"/>
+                  <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-2"><label className="lbs">Min (₦)</label><input type="number" value={jobForm.minPay} onChange={e => setJobForm({...jobForm, minPay: e.target.value})} className="fts" placeholder="150k" /></div>
+                     <div className="space-y-2"><label className="lbs">Max (₦)</label><input type="number" value={jobForm.maxPay} onChange={e => setJobForm({...jobForm, maxPay: e.target.value})} className="fts" placeholder="400k" /></div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 ml-1">Min Pay (₦/Mo)</label>
-                    <input type="number" value={jobForm.minPay} onChange={e => setJobForm({...jobForm, minPay: e.target.value})} className="w-full bg-[#f5f0e8] border border-[rgba(11,31,58,0.06)] rounded-2xl px-5 py-3.5 text-sm font-medium outline-none focus:border-[#c8921e]" placeholder="150,000"/>
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 ml-1">Max Pay (₦/Mo)</label>
-                    <input type="number" value={jobForm.maxPay} onChange={e => setJobForm({...jobForm, maxPay: e.target.value})} className="w-full bg-[#f5f0e8] border border-[rgba(11,31,58,0.06)] rounded-2xl px-5 py-3.5 text-sm font-medium outline-none focus:border-[#c8921e]" placeholder="400,000"/>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 ml-1">Job Description *</label>
-                  <textarea required value={jobForm.description} onChange={e => setJobForm({...jobForm, description: e.target.value})} className="w-full bg-[#f5f0e8] border border-[rgba(11,31,58,0.06)] rounded-2xl px-5 py-4 text-sm font-medium outline-none focus:border-[#c8921e] h-28 resize-none" placeholder="Describe the role, responsibilities, and expectations..."/>
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 ml-1">Requirements</label>
-                  <textarea value={jobForm.requirements} onChange={e => setJobForm({...jobForm, requirements: e.target.value})} className="w-full bg-[#f5f0e8] border border-[rgba(11,31,58,0.06)] rounded-2xl px-5 py-4 text-sm font-medium outline-none focus:border-[#c8921e] h-24 resize-none" placeholder="Qualifications, certifications, years of experience..."/>
-                </div>
+                <div className="space-y-2"><label className="lbs">Mission scope description</label><textarea required value={jobForm.description} onChange={e => setJobForm({...jobForm, description: e.target.value})} className="fts h-32 py-6 resize-none leading-relaxed italic" placeholder="Outline deliverables and expectations..."/></div>
+                <div className="space-y-2"><label className="lbs">Technical vetting requirements</label><textarea value={jobForm.requirements} onChange={e => setJobForm({...jobForm, requirements: e.target.value})} className="fts h-28 py-6 resize-none leading-relaxed italic" placeholder="Certifications, years of experience..."/></div>
               </div>
 
-              <button type="submit" className="w-full mt-6 py-4 bg-[#0b1f3a] text-white rounded-2xl font-bold uppercase tracking-widest text-sm hover:bg-[#c8921e] hover:text-[#0b1f3a] transition-all flex items-center justify-center gap-2">
-                <Send size={16}/> Publish Job Listing
+              <button type="submit" className="w-full py-8 bg-[#1a2e46] text-white rounded-[45px] font-black uppercase tracking-[0.6em] text-xs shadow-3xl hover:bg-[#257242] transition-all flex items-center justify-center gap-6 group">
+                PUBLISH MISSION BRIEF <Send size={20} className="group-hover:translate-x-3 transition-transform"/>
               </button>
             </form>
           </div>
         </div>
       )}
 
-      <footer className="bg-[#060f1e] py-8 px-6 text-center text-white/40 text-sm mt-10">
-        <p>© 2026 OBRUS APEX SERVICES · <Link href="/" className="text-[#e8b84b]">Home</Link> · <Link href="/hse" className="text-[#e8b84b]">HSE</Link> · <Link href="/environmental" className="text-[#e8b84b]">Environmental</Link> · <Link href="/equipment" className="text-[#e8b84b]">Equipment</Link></p>
+      <footer className="bg-[#060f1e] py-16 px-6 text-center border-t border-white/10">
+        <img src="/logo.png" className="h-10 w-auto opacity-20 mx-auto mb-8 grayscale" alt="Obrus" />
+        <p className="text-white/10 text-[9px] font-black uppercase tracking-[0.6em] italic">© 2026 OBRUS APEX SERVICES · NIGERIA OPERATIONS HUB</p>
       </footer>
 
       <style jsx>{`
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .fts { width: 100%; background: #fdfdfd; border: 1.5px solid #efefef; border-radius: 25px; padding: 22px 28px; color: #112031; font-size: 15px; font-weight: 800; outline: none; transition: 0.5s; font-style: italic; }
+        .fts:focus { border-color: #257242; box-shadow: 0 15px 40px rgba(37, 114, 66, 0.04); background: white; }
+        .lbs { font-size: 10px; font-weight: 900; text-transform: uppercase; color: rgba(37, 114, 66, 0.3); margin-left: 20px; letter-spacing: 0.3em; display: block; margin-bottom: 6px; italic; }
+        .shadow-3xl { box-shadow: 0 45px 120px -25px rgba(26, 46, 70, 0.15); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(37, 114, 66, 0.2); border-radius: 50px; }
       `}</style>
     </div>
   );
