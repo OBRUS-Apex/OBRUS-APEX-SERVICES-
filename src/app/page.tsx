@@ -48,7 +48,7 @@ export default function HomePage() {
 
       
       <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-[#1a2e46]">
-        {/* Geometric Background Pattern */}
+        
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#257242 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#257242]/20 to-transparent hidden lg:block" />
         
@@ -93,7 +93,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* APEX STATS HUB */}
+     
       <div className="bg-white py-12 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-12">
           <StatItem val="400+" label="Vetted Personnel" />
