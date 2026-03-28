@@ -101,6 +101,10 @@ export default function MasterClientPortal() {
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     router.push('/auth');
@@ -266,7 +270,7 @@ export default function MasterClientPortal() {
                         <tr key={r._id} className="hover:bg-green-50 transition-colors">
                           <td className="p-11 font-mono font-black opacity-30 text-[#1a2e46]">{r._id.slice(-8).toUpperCase()}</td>
                           <td className="p-11 font-serif font-black text-4xl italic text-[#1a2e46] underline decoration-[#257242]/10 decoration-8 underline-offset-[-2px]">{r.serviceType}</td>
-                          <td className="p-11 text-center font-bold text-[10px] text-gray-400 uppercase tracking-widest">{new Date(r.createdAt).toLocaleDateString()}</td>
+                          <td className="p-11 text-center font-bold text-[10px] text-gray-400 uppercase tracking-widest">{new Date(r.createdAt).toDateString()}</td>
                           <td className="p-11 text-right">
                              <div className={`px-5 py-2.5 rounded-full inline-block font-black text-[9px] uppercase tracking-[0.25em] shadow-lg shadow-navy/5 ${r.status === 'completed' ? 'bg-[#257242] text-white' : 'bg-gold-50 text-[#c8921e] animate-pulse'}`}>{r.status}</div>
                           </td>
@@ -286,7 +290,7 @@ export default function MasterClientPortal() {
             <motion.div initial={{ y: 50, scale: 0.95 }} animate={{ y: 0, scale: 1 }} exit={{ y: 50, scale: 0.95 }} className="bg-white w-full max-w-4xl rounded-[80px] p-20 shadow-2xl relative my-auto border border-[#257242]/10 overflow-y-auto max-h-[92vh] custom-scrollbar">
               <button onClick={() => setSelectedService(null)} className="absolute top-16 right-16 p-5 bg-navy/5 hover:bg-[#257242] hover:text-white rounded-full transition-all duration-700 shadow-lg text-[#1a2e46]"><X size={32}/></button>
               <h3 className="font-serif text-7xl font-bold tracking-tighter uppercase italic text-[#1a2e46]">Service Request</h3>
-              <p className="text-[10px] font-black text-[#257242] uppercase tracking-[0.6em] border-l-[10px] border-[#257242] pl-8 mb-20">{selectedService}</p>
+              <p className="text-[10px] font-black text-[#257242] uppercase tracking-[0.6em] border-l-[12px] border-[#257242] pl-8 mb-20">{selectedService}</p>
               
               <form onSubmit={handleRequestSubmit} className="space-y-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -320,7 +324,7 @@ export default function MasterClientPortal() {
                         <img src="/logo.png" className="h-20 w-auto" alt="Logo" />
                         <h4 className="font-serif font-black text-6xl text-[#1a2e46] tracking-tighter italic decoration-[#257242] decoration-[14px] underline-offset-[-2px] underline">Official Invoice</h4>
                       </div>
-                      <div className="text-right flex flex-col items-end gap-3 uppercase font-black"><p className="text-[10px] text-gray-200 tracking-widest italic leading-none">Reference Token</p><span className="text-3xl font-mono text-navy">#{selectedInvoice._id?.slice(-8).toUpperCase()}</span></div>
+                      <div className="text-right flex flex-col items-end gap-3 uppercase font-black"><p className="text-[10px] text-gray-200 tracking-widest italic underline decoration-gray-100 leading-none">Reference Token</p><span className="text-3xl font-mono text-navy">#{selectedInvoice._id?.slice(-8).toUpperCase()}</span></div>
                    </div>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-32 text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-20 leading-loose">
                       <div className="space-y-2"><span className="text-[#257242] block mb-4 font-black italic decoration-[#257242] decoration-4 underline">ISSUER</span>Obrus Apex Services Ltd<br/>Port Harcourt Headquarters<br/>Rivers State, Nigeria</div>
@@ -341,7 +345,7 @@ export default function MasterClientPortal() {
                      <h3 className="font-serif text-6xl font-bold text-white leading-none tracking-tighter italic decoration-[#257242] underline decoration-[10px] underline-offset-4 mb-4">Confirm Payment</h3>
                      <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.4em] leading-relaxed italic">Upload bank transfer receipt.</p>
                    </div>
-                   <form onSubmit={handleReceiptUpload} className="space-y-8">
+                   <form onSubmit={handleReceiptUpload} className="space-y-10">
                       <div className="relative group cursor-pointer h-[260px]">
                         <input type="file" required className="absolute inset-0 opacity-0 cursor-pointer z-30" onChange={e => setReceiptFile(e.target.files?.[0] || null)} />
                         <div className="h-full w-full bg-white/[0.02] border-4 border-dashed rounded-[50px] border-white/5 flex flex-col items-center justify-center text-center p-12 group-hover:bg-[#257242]/10 group-hover:border-[#257242]/50 transition-all duration-700 relative shadow-2xl">
@@ -361,7 +365,7 @@ export default function MasterClientPortal() {
       <style jsx>{`
         .ih { width: 100%; background: #fdfdfd; border: 1.5px solid #efefef; border-radius: 25px; padding: 22px 28px; color: #112031; font-size: 16px; font-weight: 800; outline: none; transition: 0.5s; font-style: italic; }
         .ih:focus { border-color: #257242; box-shadow: 0 15px 40px rgba(37, 114, 66, 0.04); background: white; }
-        .ls { font-size: 10px; font-weight: 900; text-transform: uppercase; color: rgba(37, 114, 66, 0.3); margin-left: 20px; letter-spacing: 0.3em; display: block; margin-bottom: 8px; italic; }
+        .ls { font-size: 11px; font-weight: 900; text-transform: uppercase; color: rgba(37, 114, 66, 0.3); margin-left: 20px; letter-spacing: 0.3em; display: block; margin-bottom: 8px; italic; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(37, 114, 66, 0.3); border-radius: 50px; }
         @media print { .no-print { display: none !important; } #invoice-printable { position: fixed; inset: 0; background: white; z-index: 10000; padding: 40px !important; margin: 0 !important; width: 100vw !important; max-width: none !important; height: 100vh !important; } h2, h3, h4, h5, p, span, b, strong { color: black !important; } .md\:ml-\[280px\] { margin-left: 0 !important; } }
