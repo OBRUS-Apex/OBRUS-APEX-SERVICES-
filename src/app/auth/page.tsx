@@ -187,7 +187,7 @@ export default function AuthPage() {
                   <div className="relative">
                     <div className="flex justify-between items-center mb-1 px-1">
                       <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">Security Key</label>
-                      {isLogin && <Link href="/forgot-password" size="sm" className="text-[9px] text-[#257242] font-black uppercase hover:text-[#1a2e46] transition-all">Recover ID</Link>}
+                      {isLogin && <Link href="/forgot-password"  className="text-[9px] text-[#257242] font-black uppercase hover:text-[#1a2e46] transition-all">forgot password ?</Link>}
                     </div>
                     <div className="relative">
                       <input type={showPassword ? "text" : "password"} required className="apex-input" placeholder="••••••••" 
