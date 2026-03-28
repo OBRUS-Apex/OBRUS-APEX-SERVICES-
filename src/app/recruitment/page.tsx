@@ -25,7 +25,9 @@ export default function RecruitmentPage() {
   const [selectedMyJobId, setSelectedMyJobId] = useState<string | null>(null);
   const [applicants, setApplicants] = useState<any[]>([]);
 
-  const [applyForm, setApplyForm] = useState({ name: '', phone: '', email: '', cvUrl: '' });
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const [jobForm, setJobForm] = useState({
     title: '', category: 'HSE Consultancy', location: '',
     minPay: '', maxPay: '', description: '', requirements: ''
@@ -36,7 +38,6 @@ export default function RecruitmentPage() {
     if (session) {
       const u = JSON.parse(session);
       setUser(u);
-      setApplyForm(f => ({ ...f, name: u.name || '', phone: u.phone || '', email: u.email || '' }));
       if (u.userType === 'employer') setTab('employer');
     }
     fetchAllJobs();
@@ -72,12 +73,31 @@ export default function RecruitmentPage() {
     setApplicants(Array.isArray(data) ? data : []);
   };
 
+  const uploadToCloudinary = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'obrus_uploads'); // Replace with your preset name
+    formData.append('resource_type', 'raw'); // Required for PDFs
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
+      { method: 'POST', body: formData }
+    );
+    const data = await res.json();
+    return data.secure_url;
+  };
+
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?._id) return toast.error('Please log in to apply');
-    if (!applyForm.cvUrl) return toast.error('Please provide your CV link');
-    const load = toast.loading('Submitting application...');
+    if (!cvFile) return toast.error('Please upload your CV');
+
+    setIsUploading(true);
+    const load = toast.loading('Uploading CV & Submitting...');
+
     try {
+      const cvUrl = await uploadToCloudinary(cvFile);
+
       const res = await fetch('/api/applications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,19 +105,23 @@ export default function RecruitmentPage() {
           jobId: selectedJob._id,
           candidateId: user._id,
           employerId: selectedJob.employerId,
-          cvUrl: applyForm.cvUrl,
+          cvUrl: cvUrl,
         }),
       });
-      const data = await res.json();
+
       if (res.ok) {
-        toast.success('Application submitted!', { id: load });
+        toast.success('Application submitted successfully!', { id: load });
         setApplyModal(false);
         setSelectedJob(null);
+        setCvFile(null);
       } else {
-        toast.error(data.message || 'Submission failed', { id: load });
+        const d = await res.json();
+        toast.error(d.message || 'Submission failed', { id: load });
       }
     } catch {
-      toast.error('Network error', { id: load });
+      toast.error('Cloud upload failed. Check connection.', { id: load });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -144,7 +168,7 @@ export default function RecruitmentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8] font-sans text-[#1a2e46]">
+    <div className="min-h-screen bg-[#fcfbf9] font-sans text-[#1a2e46]">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#1a2e46] border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-4 group">
@@ -259,7 +283,7 @@ export default function RecruitmentPage() {
             <div className="lg:col-span-5 bg-white rounded-[60px] p-12 border border-gray-100 shadow-3xl sticky top-28 h-fit min-h-[500px]">
               <h3 className="font-serif text-3xl font-black italic mb-2 tracking-tighter">Vetting Pool</h3>
               <p className="text-[10px] font-black uppercase text-[#257242] tracking-[0.2em] mb-10 italic border-b pb-6">Approved Professional Matches</p>
-              
+
               {applicants.length > 0 ? (
                 <div className="space-y-6">
                   {applicants.map((app: any) => (
@@ -310,12 +334,6 @@ export default function RecruitmentPage() {
                   <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#257242] mb-4 italic">Mission Parameters</p>
                   <p className="text-lg text-gray-500 leading-relaxed font-medium italic">"{selectedJob.description}"</p>
                 </div>
-                {selectedJob.requirements && (
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#257242] mb-4 italic">Technical Requirements</p>
-                    <p className="text-lg text-gray-500 leading-relaxed font-medium italic">"{selectedJob.requirements}"</p>
-                  </div>
-                )}
               </div>
 
               {!applyModal ? (
@@ -325,18 +343,26 @@ export default function RecruitmentPage() {
               ) : (
                 <form onSubmit={handleApply} className="space-y-6 animate-in slide-in-from-bottom-10 duration-700">
                   <h3 className="font-serif text-3xl font-bold text-[#1a2e46] mb-8 italic underline decoration-[#257242] decoration-4 underline-offset-8">Application Registry</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <input required value={applyForm.name} className="fts" placeholder="Legal Full Identity" readOnly />
-                    <input required value={applyForm.phone} className="fts" placeholder="Mobile Node" readOnly />
-                  </div>
-                  <input value={applyForm.email} className="fts" placeholder="Network Address (Email)" readOnly />
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[#257242] ml-6">Digital CV Link (Drive/Dropbox)</label>
-                    <input required value={applyForm.cvUrl} onChange={e => setApplyForm({...applyForm, cvUrl: e.target.value})} className="fts" placeholder="https://drive.google.com/file/..." />
-                  </div>
+                  
+                  <div className="bg-[#fcfbf9] border-2 border-dashed border-gray-200 rounded-[30px] p-12 text-center relative hover:border-[#257242] transition-all cursor-pointer group">
+                      <input 
+                        type="file" 
+                        required 
+                        className="absolute inset-0 opacity-0 cursor-pointer z-10" 
+                        onChange={e => setCvFile(e.target.files?.[0] || null)} 
+                        accept=".pdf" 
+                      />
+                      <Upload className="mx-auto text-gray-200 group-hover:text-[#257242] mb-4 transition-colors" size={40}/>
+                      <p className="text-xs font-black uppercase text-navy/40 tracking-widest">
+                        {cvFile ? cvFile.name : "Upload Curriculum Vitae (PDF Only)"}
+                      </p>
+                   </div>
+
                   <div className="flex gap-4 pt-6">
                     <button type="button" onClick={() => setApplyModal(false)} className="px-10 py-5 border-2 border-gray-100 rounded-[25px] font-black text-[10px] uppercase tracking-widest text-gray-300 hover:bg-gray-50 transition-all">Abort</button>
-                    <button type="submit" className="flex-1 py-5 bg-[#257242] text-white rounded-[25px] font-black text-[10px] uppercase tracking-[0.4em] shadow-2xl hover:bg-[#1a2e46] transition-all">Submit for Industrial Audit</button>
+                    <button type="submit" disabled={isUploading} className="flex-1 py-5 bg-[#257242] text-white rounded-[25px] font-black text-[10px] uppercase tracking-[0.4em] shadow-2xl hover:bg-[#1a2e46] transition-all disabled:opacity-50">
+                      {isUploading ? "Syncing..." : "Submit for Industrial Audit"}
+                    </button>
                   </div>
                 </form>
               )}
@@ -373,7 +399,6 @@ export default function RecruitmentPage() {
                 </div>
 
                 <div className="space-y-2"><label className="lbs">Mission scope description</label><textarea required value={jobForm.description} onChange={e => setJobForm({...jobForm, description: e.target.value})} className="fts h-32 py-6 resize-none leading-relaxed italic" placeholder="Outline deliverables and expectations..."/></div>
-                <div className="space-y-2"><label className="lbs">Technical vetting requirements</label><textarea value={jobForm.requirements} onChange={e => setJobForm({...jobForm, requirements: e.target.value})} className="fts h-28 py-6 resize-none leading-relaxed italic" placeholder="Certifications, years of experience..."/></div>
               </div>
 
               <button type="submit" className="w-full py-8 bg-[#1a2e46] text-white rounded-[45px] font-black uppercase tracking-[0.6em] text-xs shadow-3xl hover:bg-[#257242] transition-all flex items-center justify-center gap-6 group">
